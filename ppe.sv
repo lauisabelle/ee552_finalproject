@@ -1,6 +1,6 @@
 // EE 552 Final Project – Spring 2023
 // Written by Izzy Lau
-// Describes the various PE elements we use in the final project
+// Defines the Partial PE module which computes partial sums
 
 `timescale 1ns/1ns
 `define WEIGHT 0
@@ -13,7 +13,7 @@
 
 import SystemVerilogCSP::*;
 
-module pe_partial (interface in, interface out);
+module ppe (interface in, interface out);
   // Packet Format
   // |   29 - 26    |    25   |   24 - 0 |
   // | dest address |  opcode |   data   |
@@ -102,9 +102,9 @@ module pe_partial (interface in, interface out);
       end
 
       // Request more inputs from I_MEM
-      packet[ADDR_END:ADDR_START] = IFMAP_MEM_ID;
+      packet[ADDR_START:ADDR_END] = IFMAP_MEM_ID;
       packet[OPCODE] = 0; // opcode
-      packet[DATA_END:DATA_START] = 0; // irrelevant
+      packet[DATA_START:DATA_END] = 0; // irrelevant
 
       //Communication action Send is about to start
       $display("Start sending in module %m. Simulation time = %t", $time);
