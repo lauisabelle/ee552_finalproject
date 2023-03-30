@@ -36,7 +36,7 @@ module ppe (interface in, interface out);
   logic [ADDR_START - ADDR_END + 1:0] dest_address = 0;
   logic opcode;
   logic signed [DATA_START - DATA_END + 1:0] data;
-  logic [4:0] OUTPUT_DIM = IFMAP_SIZE - FILTER_SIZE + 1
+  logic [4:0] OUTPUT_DIM = IFMAP_SIZE - FILTER_SIZE + 1;
   logic signed [WEIGHT_WIDTH-1:0] weights_mem [MAX_NUM_WEIGHTS:0]; // array of MAX_NUM_WEIGHTS 8-bit elements
   logic signed [MAX_NUM_INPUTS:0] inputs_mem; // array of MAX_NUM_INPUTS 1-bit elements
   logic signed [SUM_WIDTH:0] partial_sum;
@@ -52,13 +52,13 @@ module ppe (interface in, interface out);
     in.Receive(packet);
     $display("Finished receiving in module %m. Simulation time = %t", $time);
 
-    #FL; //Forward Latency: Delay from recieving inputs to send the results forward
+    #FL; //Forward Latency: Delay from receiving inputs to send the results forward
 
     // Depacketize data
-    dest_address = packet[ADDR_END:ADDR_START];
-    output_idx = packet[IDX_END:IDX_START];
+    dest_address = packet[ADDR_START:ADDR_END];
+    output_idx = packet[IDX_START:IDX_END];
     opcode = packet[OPCODE];
-    data = packet[DATA_END:DATA_START];
+    data = packet[DATA_START:DATA_END];
 
     // If a weight packet, store weights in the memory
     if(opcode == WEIGHT) begin
@@ -66,7 +66,7 @@ module ppe (interface in, interface out);
       weights_mem[wstore_ptr+1] = data[15:8];
       wstore_ptr += 2;
     end
-    // Once inputs are recieve, start the partial sum
+    // Once inputs are received, start the partial sum
     else if(opcode == INPUT) begin
 
       // Prepare to process the next set of inputs
@@ -76,31 +76,31 @@ module ppe (interface in, interface out);
       // Store received 1-bit inputs in the memory
       inputs_mem[iptr] = data;
 
-      // Begin partial sum calculations
-      // Calculate in increments of FILTER_SIZE
-      for(int w = 0, i = isum_ptr; i < FILTER_SIZE; w++, i++) begin
-        partial_sum += (inputs_mem[i] * weights_mem[w]);
-      end
+      // Do OUTPUT_DIM number of calculations before requesting more inputs
+      for(int j = 0; j < OUTPUT_DIM; j++) begin
+        for(int w = 0, i = isum_ptr; i < FILTER_SIZE; w++, i++) begin
+          partial_sum += (inputs_mem[i] * weights_mem[w]);
+        end
 
-      // Send data to SPE
-      packet[ADDR_END:ADDR_START] = dest_address;
-      packet[OPCODE] = 0; // irrelevant for the combining PE, use 0 as dummy
-      packet[DATA_END:DATA_START] = partial_sum;
-      dest_address = (dest_address + 1) % FILTER_SIZE; // cycle through all of the SPE's 0 - 4
-      $display("Start sending in module %m. Simulation time = %t", $time);
-      $display("Sending data = %d", data);
-      out.send(packet);
-      $display("Finished sending in module %m. Simulation time = %t", $time);
-      #BL;
+        // Send data to SPE
+        packet[ADDR_START:ADDR_END] = dest_address;
+        packet[OPCODE] = 0; // irrelevant for the combining PE, use 0 as dummy
+        packet[DATA_START:DATA_END] = partial_sum;
+        dest_address = (dest_address + 1) % FILTER_SIZE; // cycle through all of the SPE's 0 - 4
+        $display("Start sending in module %m. Simulation time = %t", $time);
+        $display("Sending data = %d", data);
+        out.send(packet);
+        $display("Finished sending in module %m. Simulation time = %t", $time);
+        #BL;
 
-      // Prepare to read the next set of data
-      if(isum_ptr + 1 % OUTPUT_DIM == 0) begin
-        isum_ptr = iptr + FILTER_SIZE; // move to the next "row" of inputs
+        // Prepare to read the next set of data
+        if(isum_ptr + 1 % OUTPUT_DIM == 0) begin
+          isum_ptr = iptr + FILTER_SIZE; // move to the next "row" of inputs
+        end
+        else begin
+          isum_ptr = isum_ptr + 1; // slide the window of inputs by 1
+        end
       end
-      else begin
-        isum_ptr = isum_ptr + 1; // slide the window of inputs by 1
-      end
-
       // Request more inputs from I_MEM
       packet[ADDR_START:ADDR_END] = IFMAP_MEM_ID;
       packet[OPCODE] = 0; // opcode
