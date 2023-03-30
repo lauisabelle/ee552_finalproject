@@ -1,4 +1,4 @@
-// EE 552 Final Project – Spring 2023
+// EE 552 Final Project â Spring 2023
 // Written by Izzy Lau
 // Defines the Partial PE module which computes partial sums
 
@@ -37,13 +37,14 @@ module ppe (interface in, interface out);
   logic opcode;
   logic signed [DATA_START - DATA_END + 1:0] data;
   logic [4:0] OUTPUT_DIM = IFMAP_SIZE - FILTER_SIZE + 1;
-  logic signed [WEIGHT_WIDTH-1:0] weights_mem [MAX_NUM_WEIGHTS:0]; // array of MAX_NUM_WEIGHTS 8-bit elements
-  logic signed [MAX_NUM_INPUTS:0] inputs_mem; // array of MAX_NUM_INPUTS 1-bit elements
-  logic signed [SUM_WIDTH:0] partial_sum;
+  logic signed [`WEIGHT_WIDTH-1:0] weights_mem [`MAX_NUM_WEIGHTS:0]; // array of MAX_NUM_WEIGHTS 8-bit elements
+  logic signed [`MAX_NUM_INPUTS:0] inputs_mem; // array of MAX_NUM_INPUTS 1-bit elements
+  logic signed [`SUM_WIDTH:0] partial_sum;
 
   // Pointers
-  logic [$clog2(MAX_NUM_WEIGHTS) - 1:0] wstore_ptr = 0;
-  logic [$clog2(MAX_NUM_INPUTS) - 1:0] isum_ptr = 0
+  logic [$clog2(`MAX_NUM_WEIGHTS) - 1:0] wstore_ptr = 0;
+  logic [$clog2(`MAX_NUM_INPUTS) - 1:0] isum_ptr = 0;
+  integer i, w = 0;
 
   always begin
 
@@ -56,29 +57,27 @@ module ppe (interface in, interface out);
 
     // Depacketize data
     dest_address = packet[ADDR_START:ADDR_END];
-    output_idx = packet[IDX_START:IDX_END];
     opcode = packet[OPCODE];
     data = packet[DATA_START:DATA_END];
 
     // If a weight packet, store weights in the memory
-    if(opcode == WEIGHT) begin
+    if(opcode == `WEIGHT) begin
       weights_mem[wstore_ptr] = data[7:0]; // weights are always 8-bit values
       weights_mem[wstore_ptr+1] = data[15:8];
       wstore_ptr += 2;
     end
     // Once inputs are received, start the partial sum
-    else if(opcode == INPUT) begin
+    else if(opcode == `INPUT) begin
 
       // Prepare to process the next set of inputs
-      iptr = 0;
       isum_ptr = 0;
 
       // Store received 1-bit inputs in the memory
-      inputs_mem[iptr] = data;
+      inputs_mem[isum_ptr] = data;
 
       // Do OUTPUT_DIM number of calculations before requesting more inputs
       for(int j = 0; j < OUTPUT_DIM; j++) begin
-        for(int w = 0, i = isum_ptr; i < FILTER_SIZE; w++, i++) begin
+        for(w = 0, i = isum_ptr; i < FILTER_SIZE; w++, i++) begin
           partial_sum += (inputs_mem[i] * weights_mem[w]);
         end
 
@@ -95,14 +94,14 @@ module ppe (interface in, interface out);
 
         // Prepare to read the next set of data
         if(isum_ptr + 1 % OUTPUT_DIM == 0) begin
-          isum_ptr = iptr + FILTER_SIZE; // move to the next "row" of inputs
+          isum_ptr = i + FILTER_SIZE; // move to the next "row" of inputs
         end
         else begin
           isum_ptr = isum_ptr + 1; // slide the window of inputs by 1
         end
       end
       // Request more inputs from I_MEM
-      packet[ADDR_START:ADDR_END] = IFMAP_MEM_ID;
+      packet[ADDR_START:ADDR_END] = `IFMAP_MEM_ID;
       packet[OPCODE] = 0; // opcode
       packet[DATA_START:DATA_END] = 0; // irrelevant
 
