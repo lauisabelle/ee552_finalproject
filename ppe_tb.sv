@@ -37,6 +37,10 @@ module ppe_tb;
 
       intf[0].Send(packet);
       #FL;
+
+      // convert to binary
+      // take clog() to get number of bits
+      // left justify to pad with zeros
       
 
       // create second weight packet

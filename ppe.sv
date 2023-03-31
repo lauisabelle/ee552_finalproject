@@ -9,7 +9,7 @@
 `define SUM_WIDTH 13
 `define MAX_NUM_WEIGHTS 32 // local storage upper bound
 `define MAX_NUM_INPUTS 32
-`define IFMAP_MEM_ID 10
+`define IMEM_ID 10
 
 import SystemVerilogCSP::*;
 
@@ -53,8 +53,8 @@ module ppe (interface in, interface out);
     in.Receive(packet);
     $display("Finished receiving in module %m. Simulation time = %t", $time);
 
-    #FL; //Forward Latency: Delay from receiving inputs to send the results forward
-
+    #FL; 
+    
     // Depacketize data
     dest_address = packet[ADDR_START:ADDR_END];
     opcode = packet[OPCODE];
@@ -88,7 +88,7 @@ module ppe (interface in, interface out);
         dest_address = (dest_address + 1) % FILTER_SIZE; // cycle through all of the SPE's 0 - 4
         $display("Start sending in module %m. Simulation time = %t", $time);
         $display("Sending data = %d", data);
-        out.send(packet);
+        out.Send(packet);
         $display("Finished sending in module %m. Simulation time = %t", $time);
         #BL;
 
@@ -101,14 +101,14 @@ module ppe (interface in, interface out);
         end
       end
       // Request more inputs from I_MEM
-      packet[ADDR_START:ADDR_END] = `IFMAP_MEM_ID;
+      packet[ADDR_START:ADDR_END] = `IMEM_ID;
       packet[OPCODE] = 0; // opcode
       packet[DATA_START:DATA_END] = 0; // irrelevant
 
       //Communication action Send is about to start
       $display("Start sending in module %m. Simulation time = %t", $time);
       $display("Sending data = %d", data);
-      out.send(packet);
+      outS(packet);
       //Communication action Send is finished
       $display("Finished sending in module %m. Simulation time = %t", $time);
       #BL;//Backward Latency: Delay from the time data is delivered to the time next input can be accepted
