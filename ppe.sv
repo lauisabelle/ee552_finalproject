@@ -1,4 +1,5 @@
-// EE 552 Final Project â Spring 2023
+
+// EE 552 Final Project Ã¢ÂÂ Spring 2023
 // Written by Izzy Lau
 // Defines the Partial PE module which computes partial sums
 
@@ -7,8 +8,8 @@
 `define INPUT 1
 `define WEIGHT_WIDTH 8
 `define SUM_WIDTH 13
-`define MAX_NUM_WEIGHTS 32 // local storage upper bound
-`define MAX_NUM_INPUTS 32
+`define NUM_WEIGHTS 5 // local storage upper bound
+`define NUM_INPUTS 25
 `define IMEM_ID 10
 
 import SystemVerilogCSP::*;
@@ -37,13 +38,13 @@ module ppe (interface in, interface out);
   logic opcode;
   logic signed [DATA_START - DATA_END + 1:0] data;
   logic [4:0] OUTPUT_DIM = IFMAP_SIZE - FILTER_SIZE + 1;
-  logic signed [`WEIGHT_WIDTH-1:0] weights_mem [`MAX_NUM_WEIGHTS:0]; // array of MAX_NUM_WEIGHTS 8-bit elements
-  logic signed [`MAX_NUM_INPUTS:0] inputs_mem; // array of MAX_NUM_INPUTS 1-bit elements
-  logic signed [`SUM_WIDTH:0] partial_sum;
+  logic signed [`WEIGHT_WIDTH-1:0] weights_mem [`NUM_WEIGHTS:0]; // array of MAX_NUM_WEIGHTS 8-bit elements
+  logic signed [`NUM_INPUTS-1:0] inputs_mem; // array of MAX_NUM_INPUTS 1-bit elements
+  logic signed [`SUM_WIDTH:0] partial_sum = 0;
 
   // Pointers
-  logic [$clog2(`MAX_NUM_WEIGHTS) - 1:0] wstore_ptr = 0;
-  logic [$clog2(`MAX_NUM_INPUTS) - 1:0] isum_ptr = 0;
+  logic [$clog2(`NUM_WEIGHTS) - 1:0] wstore_ptr = 0;
+  logic [$clog2(`NUM_INPUTS) - 1:0] isum_ptr = 0;
   integer i, w = 0;
 
   always begin
@@ -64,7 +65,8 @@ module ppe (interface in, interface out);
     if(opcode == `WEIGHT) begin
       weights_mem[wstore_ptr] = data[7:0]; // weights are always 8-bit values
       weights_mem[wstore_ptr+1] = data[15:8];
-      wstore_ptr += 2;
+	weights_mem[wstore_ptr+2] = data[23:16];
+      wstore_ptr += 3;
     end
     // Once inputs are received, start the partial sum
     else if(opcode == `INPUT) begin
@@ -73,11 +75,13 @@ module ppe (interface in, interface out);
       isum_ptr = 0;
 
       // Store received 1-bit inputs in the memory
-      inputs_mem[isum_ptr] = data;
+      //inputs_mem[isum_ptr] = data;
+	inputs_mem = data;
 
       // Do OUTPUT_DIM number of calculations before requesting more inputs
       for(int j = 0; j < OUTPUT_DIM; j++) begin
-        for(w = 0, i = isum_ptr; i < FILTER_SIZE; w++, i++) begin
+	partial_sum = 0;
+        for(w = 0, i = isum_ptr; w < FILTER_SIZE; w++, i++) begin
           partial_sum += (inputs_mem[i] * weights_mem[w]);
         end
 
@@ -87,7 +91,7 @@ module ppe (interface in, interface out);
         packet[DATA_START:DATA_END] = partial_sum;
         dest_address = (dest_address + 1) % FILTER_SIZE; // cycle through all of the SPE's 0 - 4
         $display("Start sending in module %m. Simulation time = %t", $time);
-        $display("Sending data = %d", data);
+        $display("Sending data = %d", partial_sum);
         out.Send(packet);
         $display("Finished sending in module %m. Simulation time = %t", $time);
         #BL;
@@ -108,7 +112,7 @@ module ppe (interface in, interface out);
       //Communication action Send is about to start
       $display("Start sending in module %m. Simulation time = %t", $time);
       $display("Sending data = %d", data);
-      outS(packet);
+      out.Send(packet);
       //Communication action Send is finished
       $display("Finished sending in module %m. Simulation time = %t", $time);
       #BL;//Backward Latency: Delay from the time data is delivered to the time next input can be accepted
