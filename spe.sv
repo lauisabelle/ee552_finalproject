@@ -140,11 +140,5 @@ module ppe (interface in, interface out);
       first_timestep_flag = 0;
     end
 
-
-    // else if(opcode == `OP_PREVIOUS_POTENTIAL) begin
-
-      
-    // end
-
   end
 endmodule

@@ -1,5 +1,5 @@
 
-// EE 552 Final Project â Spring 2023
+// EE 552 Final Project Ã¢ÂÂ Spring 2023
 // Written by Izzy Lau
 // Describes the various PE elements we use in the final project
 
@@ -23,29 +23,19 @@ module ppe_tb;
 
 	logic [ADDR_START:0] packet;
 	logic [24:0] data = 0;
+
 	always begin
+
+		// create first weight packet
 		packet[ADDR_START:ADDR_END] = 4'd5;  
    	 	packet[OPCODE] = 0; 
 		packet[24] = 0;
    	 	packet[23:16] = 8'd3; 
    	 	packet[15:8] = 8'd2; 
    	 	packet[7:0] = 8'd1; 
-	
-
-		// create first weight packet
-		//packet[ADDR_START:ADDR_END] = 4'd5;
-		//packet[OPCODE] = 0;
-		//packet[24] = 0;
-		//packet[23:16] = 8'd0; 
-		//packet[15:8] = 8'd5; 
-  		//packet[7:0] = 8'd4; 
 
 	  	intf[0].Send(packet);
-	  	#FL;
-	
-	  // convert to binary
-	  // take clog() to get number of bits
-	  // left justify to pad with zeros
+	  	#FL;	
 
 		// create second weight packet
 		packet[ADDR_START:ADDR_END] = 4'd5; 
@@ -57,9 +47,10 @@ module ppe_tb;
 
 		intf[0].Send(packet);
 		#FL;
-	
+		
+		// send 25 inputs
 		for(int i = 0; i < 25; i=i+1) begin
-			data[i] = i;
+			data[i] = i%2;
 		end
 
 		packet[29:26] = 4'd5; 
@@ -67,7 +58,23 @@ module ppe_tb;
 		packet[24:0] = data;
 
 		intf[0].Send(packet);
-		#FL;
+		#20;
+
+
+		// send 25 inputs
+		for(int i = 1; i < 26; i=i+1) begin
+			data[i-1] = i%2;
+		end
+
+		packet[29:26] = 4'd5; 
+		packet[OPCODE] = 1; // input 
+		packet[24:0] = data;
+
+		intf[0].Send(packet);
+		#100;
+		$stop;
+
+
 		
 	end
 
@@ -113,4 +120,3 @@ module data_bucket (interface r);
 	
   end
 endmodule
-

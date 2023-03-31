@@ -1,5 +1,5 @@
 
-// EE 552 Final Project Ã¢ÂÂ Spring 2023
+// EE 552 Final Project ÃÂ¢ÃÂÃÂ Spring 2023
 // Written by Izzy Lau
 // Defines the Partial PE module which computes partial sums
 
@@ -65,9 +65,10 @@ module ppe (interface in, interface out);
     if(opcode == `WEIGHT) begin
       weights_mem[wstore_ptr] = data[7:0]; // weights are always 8-bit values
       weights_mem[wstore_ptr+1] = data[15:8];
-	weights_mem[wstore_ptr+2] = data[23:16];
+	    weights_mem[wstore_ptr+2] = data[23:16];
       wstore_ptr += 3;
     end
+    
     // Once inputs are received, start the partial sum
     else if(opcode == `INPUT) begin
 
@@ -76,11 +77,11 @@ module ppe (interface in, interface out);
 
       // Store received 1-bit inputs in the memory
       //inputs_mem[isum_ptr] = data;
-	inputs_mem = data;
+	    inputs_mem = data;
 
       // Do OUTPUT_DIM number of calculations before requesting more inputs
       for(int j = 0; j < OUTPUT_DIM; j++) begin
-	partial_sum = 0;
+	      partial_sum = 0;
         for(w = 0, i = isum_ptr; w < FILTER_SIZE; w++, i++) begin
           partial_sum += (inputs_mem[i] * weights_mem[w]);
         end
@@ -104,6 +105,7 @@ module ppe (interface in, interface out);
           isum_ptr = isum_ptr + 1; // slide the window of inputs by 1
         end
       end
+      
       // Request more inputs from I_MEM
       packet[ADDR_START:ADDR_END] = `IMEM_ID;
       packet[OPCODE] = 0; // opcode
