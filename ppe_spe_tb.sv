@@ -1,35 +1,41 @@
 
+
 // EE 552 Final Project Ã¢ÂÂ Spring 2023
 // Written by Izzy Lau
-// Describes the various PE elements we use in the final project
+// Verifies functionality of connected PPE and SPE
 
 `timescale 1ns/1ns
 import SystemVerilogCSP::*;
 
-module ppe_tb;
-  parameter ADDR_START = 29;
-  parameter ADDR_END = 26;
-  parameter OPCODE = 25;
-  parameter FL = 4;
-  parameter BL = 2;
+module ppe_spe_tb;
+    parameter ADDR_START = 32;
+    parameter ADDR_END = 29;
+    parameter OPCODE_START = 28;
+    parameter OPCODE_END = 25;
+    parameter DATA_START = 24;
+    parameter DATA_END = 0;
+
+    parameter FL = 4;
+    parameter BL = 2;
 
 	//Interface Vector instatiation: 4-phase bundled data channel
-	Channel #(.hsProtocol(P4PhaseBD), .WIDTH(50)) intf  [1:0] (); 
+	Channel #(.hsProtocol(P4PhaseBD), .WIDTH(33)) intf  [2:0] (); 
 
-	ppe ppe_mod(.in(intf[0]), .out(intf[1]));
+	// Send partial sums from PPE to SPE
+    ppe #(.PE_ID(5)) ppe_mod(.in(intf[0]), .out(intf[1]));
+    spe #(.PE_ID(0)) spe_mod(.in(intf[1]), .out(intf[2]));
+
 
 	// Channel #(.hsProtocol(P4PhaseBD), .WIDTH(1)) start (); 
-	data_bucket #(.WIDTH(50)) db(intf[1]);
+	data_bucket #(.WIDTH(33)) db(intf[2]);
 
-	logic [ADDR_START:0] packet;
+	logic [ADDR_START:0] packet = 0;
 	logic [24:0] data = 0;
 
 	always begin
-
 		// create first weight packet
 		packet[ADDR_START:ADDR_END] = 4'd5;  
-   	 	packet[OPCODE] = 0; 
-		packet[24] = 0;
+   	 	packet[OPCODE_START:OPCODE_END] = 0; 
    	 	packet[23:16] = 8'd3; 
    	 	packet[15:8] = 8'd2; 
    	 	packet[7:0] = 8'd1; 
@@ -39,8 +45,8 @@ module ppe_tb;
 
 		// create second weight packet
 		packet[ADDR_START:ADDR_END] = 4'd5; 
-		packet[OPCODE] = 0;
-		packet[24] = 0;
+		packet[OPCODE_START:OPCODE_END] = 0;
+		//packet[24] = 0;
 		packet[23:16] = 8'd6; // dummy val since discarded
 		packet[15:8] = 8'd5; 
 		packet[7:0] = 8'd4; 
@@ -54,7 +60,7 @@ module ppe_tb;
 		end
 
 		packet[29:26] = 4'd5; 
-		packet[OPCODE] = 1; // input 
+		packet[OPCODE_START:OPCODE_END] = 1; // input 
 		packet[24:0] = data;
 
 		intf[0].Send(packet);
@@ -67,26 +73,18 @@ module ppe_tb;
 		end
 
 		packet[29:26] = 4'd5; 
-		packet[OPCODE] = 1; // input 
+		packet[OPCODE_START:OPCODE_END] = 1; // input 
 		packet[24:0] = data;
 
 		intf[0].Send(packet);
 		#100;
 		$stop;
 
-
 		
 	end
 
 
 endmodule
-
-
-
-
-
-
-
 
 
 //Sample data_bucket module

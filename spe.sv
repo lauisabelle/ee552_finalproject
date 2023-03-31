@@ -1,23 +1,23 @@
-// EE 552 Final Project â Spring 2023
+// EE 552 Final Project – Spring 2023
 // Written by Izzy Lau
 // Defines the Sum PE module which aggregates partial sums
 
 `timescale 1ns/1ns
 `define OP_PARTIAL_SUM 0
-`define OP_PREVIOUS_POTENTIAL 1
-`define OP_FIRST_TIMESTEP_DONE 3
+`define OP_FIRST_TIMESTEP_DONE 1
+`define OP_PREVIOUS_POTENTIAL 2
 `define SUM_WIDTH 13
 `define OMEM_ID 10
+`define 
 
 import SystemVerilogCSP::*;
 
-module ppe (interface in, interface out);
-  // Packet Format
-  // |   29 - 26    |    25   |   24 - 0 |
-  // | dest address |  opcode |   data   |
-  parameter ADDR_START = 29;
-  parameter ADDR_END = 26;
-  parameter OPCODE = 25;
+module spe (interface in, interface out);
+
+  parameter ADDR_START = 32;
+  parameter ADDR_END = 29;
+  parameter OPCODE_START = 28;
+  parameter OPCODE_END = 25;
   parameter DATA_START = 24;
   parameter DATA_END = 0;
   parameter PE_ID = -1;
@@ -34,18 +34,22 @@ module ppe (interface in, interface out);
 
   // Packet storage
   logic [ADDR_START:0] packet;
-  logic [ADDR_START - ADDR_END + 1:0] dest_address;
-  logic opcode;
-  logic [DATA_START - DATA_END + 1:0] data;
-  logic [DATA_START - DATA_END + 1:0] prev_potential_val;
+  logic [ADDR_START - ADDR_END:0] dest_address;
+  logic [OPCODE_START - OPCODE_END:0] opcode;
+  logic [DATA_START - DATA_END:0] data;
+  logic [DATA_START - DATA_END:0] prev_potential_val;
 
   logic [4:0] OUTPUT_DIM = IFMAP_SIZE - FILTER_SIZE + 1;
   
-  logic [`SUM_WIDTH-1:0] sum = 0;
-  logic[$clog2(OUTPUT_DIM):0] ctr = 0;;
-  logic first_timestep_flag;
+  logic [DATA_START - DATA_END:0] sum = 0;
+
+  logic[$clog2(FILTER_SIZE):0] ctr = 0;
+
+	//logic [9:0] cnt_for_timestep = 0;
+  
+  logic first_timestep_flag = 1;
   logic spike;
-  logic [SUM_WIDTH-1:0] new_potential;
+  logic [`SUM_WIDTH-1:0] new_potential;
 
   always begin
 
@@ -58,7 +62,7 @@ module ppe (interface in, interface out);
 
     // Depacketize data
     dest_address = packet[ADDR_START:ADDR_END];
-    opcode = packet[OPCODE];
+    opcode = packet[OPCODE_START:OPCODE_END];
     data = packet[DATA_START:DATA_END];
 
     // If a partial sum, aggregate the value
@@ -75,7 +79,7 @@ module ppe (interface in, interface out);
 
           // Send partial sum to the output memory
           packet[ADDR_START:ADDR_END] = `OMEM_ID;
-          packet[OPCODE] = 0; // aggregated membrane potential
+          packet[OPCODE_START:OPCODE_END] = 4'b0; // aggregated membrane potential
           packet[DATA_START:DATA_END] = sum;
 
           // Communication action Send is about to start
@@ -84,18 +88,15 @@ module ppe (interface in, interface out);
           out.Send(packet);
           $display("Finished sending in module %m. Simulation time = %t", $time);
           #BL;
-
-          // ctr = 0; // reset ctr
-          // sum = 0; // reset sum for next set of partial sums
         end
-    
+        
         // Second timestep --> fetch the membrane potential
         else begin
           
           // Send request for previous timestep's membrane potential
           packet[ADDR_START:ADDR_END] = `OMEM_ID;
-          packet[OPCODE] = 1; // request for previous membrane potential
-          packet[DATA_START:DATA_END] = 0; // dummy
+          packet[OPCODE_START:OPCODE_END] = 4'b1; // request for previous membrane potential
+          packet[DATA_START:DATA_END] = 25'b0; // dummy
 
           // Send the request
           out.Send(packet);
@@ -103,7 +104,7 @@ module ppe (interface in, interface out);
           #FL;
 
           // Receive the previous potential value
-          out.Receive(packet);
+          in.Receive(packet);
           
           #BL;
 
@@ -117,11 +118,11 @@ module ppe (interface in, interface out);
           else begin
             spike = 0;
           end
-
+		packet = 0;
           // Send new potential and spike to memory
           packet[ADDR_START:ADDR_END] = `OMEM_ID;
-          packet[OPCODE] = {1, PE_ID}; // 1 appended to SPE ID
-          packet[DATA_START:DATA_END] = append sum and spike together somehow;
+          packet[OPCODE_START:OPCODE_END] = {1, PE_ID}; // 1 appended to SPE ID
+          packet[13:0] = {new_potential, spike}; // spike is LSB of data packet
 
 
           $display("Start sending in module %m. Simulation time = %t", $time);
@@ -132,11 +133,10 @@ module ppe (interface in, interface out);
         end
         ctr = 0; // reset ctr
         sum = 0; // reset sum for next set of partial sums
-
       end
     end
 
-    else if(opcode == `OP_PREVIOUS_POTENTIAL) begin
+    else if(opcode == `OP_FIRST_TIMESTEP_DONE) begin
       first_timestep_flag = 0;
     end
 

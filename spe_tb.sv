@@ -1,4 +1,5 @@
 
+
 // EE 552 Final Project Ã¢ÂÂ Spring 2023
 // Written by Izzy Lau
 // Describes the various PE elements we use in the final project
@@ -6,87 +7,77 @@
 `timescale 1ns/1ns
 import SystemVerilogCSP::*;
 
-module ppe_tb;
-  parameter ADDR_START = 29;
-  parameter ADDR_END = 26;
-  parameter OPCODE = 25;
-  parameter FL = 4;
-  parameter BL = 2;
+module spe_tb;
+    parameter ADDR_START = 32;
+    parameter ADDR_END = 29;
+    parameter OPCODE_START = 28;
+    parameter OPCODE_END = 25;
+    parameter DATA_START = 24;
+    parameter DATA_END = 0;
+
+    parameter FL = 4;
+    parameter BL = 2;
 
 	//Interface Vector instatiation: 4-phase bundled data channel
-	Channel #(.hsProtocol(P4PhaseBD), .WIDTH(50)) intf  [1:0] (); 
+	Channel #(.hsProtocol(P4PhaseBD), .WIDTH(35)) intf  [1:0] (); 
 
-	ppe ppe_mod(.in(intf[0]), .out(intf[1]));
+	spe #(.PE_ID(0)) spe_mod(.in(intf[0]), .out(intf[1]));
 
 	// Channel #(.hsProtocol(P4PhaseBD), .WIDTH(1)) start (); 
-	data_bucket #(.WIDTH(50)) db(intf[1]);
+	data_bucket #(.WIDTH(35)) db(intf[1]);
 
 	logic [ADDR_START:0] packet;
 	logic [24:0] data = 0;
 
 	always begin
 
-		// create first weight packet
-		packet[ADDR_START:ADDR_END] = 4'd5;  
-   	 	packet[OPCODE] = 0; 
-		packet[24] = 0;
-   	 	packet[23:16] = 8'd3; 
-   	 	packet[15:8] = 8'd2; 
-   	 	packet[7:0] = 8'd1; 
-
-	  	intf[0].Send(packet);
-	  	#FL;	
-
-		// create second weight packet
-		packet[ADDR_START:ADDR_END] = 4'd5; 
-		packet[OPCODE] = 0;
-		packet[24] = 0;
-		packet[23:16] = 8'd6; // dummy val since discarded
-		packet[15:8] = 8'd5; 
-		packet[7:0] = 8'd4; 
-
-		intf[0].Send(packet);
-		#FL;
+		// create partial sum packets and send
+        for(int i = 0; i < 5; i++) begin
+            packet[ADDR_START:ADDR_END] = 4'b0;  
+            packet[OPCODE_START:OPCODE_END] = 4'b0; 
+            packet[DATA_START:DATA_END] = 25'(i);
+            intf[0].Send(packet);
+	  	    #FL;	
+        end
 		
-		// send 25 inputs
-		for(int i = 0; i < 25; i=i+1) begin
-			data[i] = i%2;
-		end
+        #FL;
+        #BL;
 
-		packet[29:26] = 4'd5; 
-		packet[OPCODE] = 1; // input 
-		packet[24:0] = data;
+		// send timestep flag
+        packet[ADDR_START:ADDR_END] = 4'd0;  
+        packet[OPCODE_START:OPCODE_END] = 4'd1; // indicate timestep done
+        packet[DATA_START:DATA_END] = 25'b0; // irrelevant
+        intf[0].Send(packet);
+	
+	#FL;
 
-		intf[0].Send(packet);
-		#20;
+	// create partial sum packets and send
+        for(int i = 0; i < 5; i++) begin
+            packet[ADDR_START:ADDR_END] = 4'b0;  
+            packet[OPCODE_START:OPCODE_END] = 4'b0; 
+            packet[DATA_START:DATA_END] = 25'(i);
+            intf[0].Send(packet);
+	    #FL;	
+        end
+		
+        #FL;
+        #BL;
 
 
-		// send 25 inputs
-		for(int i = 1; i < 26; i=i+1) begin
-			data[i-1] = i%2;
-		end
 
-		packet[29:26] = 4'd5; 
-		packet[OPCODE] = 1; // input 
-		packet[24:0] = data;
+        // send previous potential
+	packet[ADDR_START:ADDR_END] = 4'd0;  
+        packet[OPCODE_START:OPCODE_END] = 4'd2; // indicate previous potential
+        packet[DATA_START:DATA_END] = 25'd60; // random
+        intf[0].Send(packet);
 
-		intf[0].Send(packet);
 		#100;
 		$stop;
-
-
 		
 	end
 
 
 endmodule
-
-
-
-
-
-
-
 
 
 //Sample data_bucket module
