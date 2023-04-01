@@ -67,7 +67,7 @@ module ppe (interface in, interface out);
     if(opcode == `WEIGHT) begin
       weights_mem[wstore_ptr] = data[7:0]; // weights are always 8-bit values
       weights_mem[wstore_ptr+1] = data[15:8];
-	weights_mem[wstore_ptr+2] = data[23:16];
+	    weights_mem[wstore_ptr+2] = data[23:16];
       wstore_ptr += 3;
     end
     // Once inputs are received, start the partial sum
@@ -78,18 +78,18 @@ module ppe (interface in, interface out);
 
       // Store received 1-bit inputs in the memory
       //inputs_mem[isum_ptr] = data;
-	inputs_mem = data;
+	    inputs_mem = data;
 
       // Do OUTPUT_DIM number of calculations before requesting more inputs
       for(int j = 0; j < OUTPUT_DIM; j++) begin
-	partial_sum = 0;
+	      partial_sum = 0;
         for(w = 0, i = isum_ptr; w < FILTER_SIZE; w++, i++) begin
           partial_sum += (inputs_mem[i] * weights_mem[w]);
         end
 
         // Send data to SPE
         packet[ADDR_START:ADDR_END] = dest_address;
-        packet[OPCODE_START:OPCODE_END] = 4'd0; // irrelevant for the combining PE, use 0 as dummy
+        packet[OPCODE_START:OPCODE_END] = 4'd0; 
         packet[DATA_START:DATA_END] = partial_sum;
         dest_address = (dest_address + 1) % FILTER_SIZE; // cycle through all of the SPE's 0 - 4
         $display("Start sending in module %m. Simulation time = %t", $time);
@@ -106,9 +106,10 @@ module ppe (interface in, interface out);
           isum_ptr = isum_ptr + 1; // slide the window of inputs by 1
         end
       end
+      packet = 0;
       // Request more inputs from I_MEM
       packet[ADDR_START:ADDR_END] = `IMEM_ID;
-      packet[OPCODE_START:OPCODE_END] = 4'd0; // opcode
+      packet[OPCODE_START:OPCODE_END] = PE_ID;
       packet[DATA_START:DATA_END] = 0; // irrelevant
 
       //Communication action Send is about to start
