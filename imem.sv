@@ -11,7 +11,7 @@
 `define OP_PPE_7_REQ_INPUT 7 // OPCODE: PPE 7 requests more inputs
 `define OP_PPE_8_REQ_INPUT 8 // OPCODE: PPE 8 requests more inputs
 `define OP_PPE_9_REQ_INPUT 9 // OPCODE: PPE 9 requests more inputs
-`define OP_TIMESTEP_DONE 10 // OPCODE: PPE 9 requests more inputs
+`define OP_TIMESTEP_DONE 15 
 `define WEIGHT_WIDTH 8
 `define SUM_WIDTH 13
 `define NUM_WEIGHTS 5 // local storage upper bound

@@ -4,10 +4,10 @@
 
 `timescale 1ns/1ns
 `define OP_PARTIAL_SUM 0
-`define OP_FIRST_TIMESTEP_DONE 1
+`define OP_FIRST_TIMESTEP_DONE 15
 `define OP_PREVIOUS_POTENTIAL 2
 `define SUM_WIDTH 13
-`define OMEM_ID 10
+`define OMEM_ID 12
 `define 
 
 import SystemVerilogCSP::*;
@@ -73,64 +73,49 @@ module spe (interface in, interface out);
 
       // Finished aggregating
       if(ctr == 5) begin
-        
-        // First timestep --> don't request previous value
+
         if(first_timestep_flag) begin
-
-          // Send partial sum to the output memory
-          packet[ADDR_START:ADDR_END] = `OMEM_ID;
-          packet[OPCODE_START:OPCODE_END] = 4'b0; // aggregated membrane potential
-          packet[DATA_START:DATA_END] = sum;
-
-          // Communication action Send is about to start
-          $display("Start sending in module %m. Simulation time = %t", $time);
-          $display("Sending data = %d", data);
-          out.Send(packet);
-          $display("Finished sending in module %m. Simulation time = %t", $time);
-          #BL;
+          prev_potential_val = 0;
         end
-        
-        // Second timestep --> fetch the membrane potential
         else begin
-          
           // Send request for previous timestep's membrane potential
           packet[ADDR_START:ADDR_END] = `OMEM_ID;
-          packet[OPCODE_START:OPCODE_END] = 4'b1; // request for previous membrane potential
+          packet[OPCODE_START:OPCODE_END] ={PE_ID, 1}; // request for previous membrane potential
           packet[DATA_START:DATA_END] = 25'b0; // dummy
 
           // Send the request
           out.Send(packet);
-
           #FL;
 
           // Receive the previous potential value
           in.Receive(packet);
-          
           #BL;
 
-          prev_potential_val = packet[DATA_START:DATA_END];
-          new_potential = prev_potential_val + sum;
-
-          if(new_potential > threshold) begin
-            spike = 1;
-            new_potential = new_potential - threshold;
-          end
-          else begin
-            spike = 0;
-          end
-		packet = 0;
-          // Send new potential and spike to memory
-          packet[ADDR_START:ADDR_END] = `OMEM_ID;
-          packet[OPCODE_START:OPCODE_END] = {1, PE_ID}; // 1 appended to SPE ID
-          packet[13:0] = {new_potential, spike}; // spike is LSB of data packet
-
-
-          $display("Start sending in module %m. Simulation time = %t", $time);
-          $display("Sending data = %d", data);
-          out.Send(packet);
-          $display("Finished sending in module %m. Simulation time = %t", $time);
-          #BL;
+          prev_potential_val = packet[0];
         end
+
+        new_potential = prev_potential_val + sum;
+        if(new_potential > threshold) begin
+          spike = 1;
+          new_potential = new_potential - threshold;
+        end
+        else begin
+          spike = 0;
+        end
+        
+        // Send new potential and spike to memory
+        packet = 0;
+        packet[ADDR_START:ADDR_END] = `OMEM_ID;
+        packet[OPCODE_START:OPCODE_END] = {PE_ID, 0}; // 1 appended to SPE ID
+        packet[13:0] = {new_potential, spike}; // spike is LSB of data packet
+
+
+        $display("Start sending in module %m. Simulation time = %t", $time);
+        $display("Sending data = %d", data);
+        out.Send(packet);
+        $display("Finished sending in module %m. Simulation time = %t", $time);
+        #BL;
+        
         ctr = 0; // reset ctr
         sum = 0; // reset sum for next set of partial sums
       end
