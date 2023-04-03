@@ -7,19 +7,22 @@
 import SystemVerilogCSP::*;
 
 module ppe_tb;
-  parameter ADDR_START = 29;
-  parameter ADDR_END = 26;
-  parameter OPCODE = 25;
-  parameter FL = 4;
-  parameter BL = 2;
+  	parameter ADDR_START = 32;
+	parameter ADDR_END = 29;
+	parameter OPCODE_START = 28;
+	parameter OPCODE_END = 25;
+	parameter DATA_START = 24;
+	parameter DATA_END = 0;
+	parameter FL = 4;
+	parameter BL = 2;
 
 	//Interface Vector instatiation: 4-phase bundled data channel
-	Channel #(.hsProtocol(P4PhaseBD), .WIDTH(50)) intf  [1:0] (); 
+	Channel #(.hsProtocol(P4PhaseBD), .WIDTH(33)) intf  [1:0] (); 
 
 	ppe ppe_mod(.in(intf[0]), .out(intf[1]));
 
 	// Channel #(.hsProtocol(P4PhaseBD), .WIDTH(1)) start (); 
-	data_bucket #(.WIDTH(50)) db(intf[1]);
+	data_bucket #(.WIDTH(33)) db(intf[1]);
 
 	logic [ADDR_START:0] packet;
 	logic [24:0] data = 0;
@@ -28,7 +31,7 @@ module ppe_tb;
 
 		// create first weight packet
 		packet[ADDR_START:ADDR_END] = 4'd5;  
-   	 	packet[OPCODE] = 0; 
+   	 	packet[OPCODE_START:OPCODE_END] = 0; 
 		packet[24] = 0;
    	 	packet[23:16] = 8'd3; 
    	 	packet[15:8] = 8'd2; 
@@ -39,9 +42,9 @@ module ppe_tb;
 
 		// create second weight packet
 		packet[ADDR_START:ADDR_END] = 4'd5; 
-		packet[OPCODE] = 0;
+		packet[OPCODE_START:OPCODE_END] = 0; 
 		packet[24] = 0;
-		packet[23:16] = 8'd6; // dummy val since discarded
+		packet[23:16] = 8'd0; // dummy val since discarded
 		packet[15:8] = 8'd5; 
 		packet[7:0] = 8'd4; 
 
@@ -53,9 +56,9 @@ module ppe_tb;
 			data[i] = i%2;
 		end
 
-		packet[29:26] = 4'd5; 
-		packet[OPCODE] = 1; // input 
-		packet[24:0] = data;
+		packet[ADDR_START:ADDR_END] = 4'd5; 
+		packet[OPCODE_START:OPCODE_END] = 1; // INPUT 
+		packet[24:0] = 25'(data);
 
 		intf[0].Send(packet);
 		#20;
@@ -66,11 +69,67 @@ module ppe_tb;
 			data[i-1] = i%2;
 		end
 
-		packet[29:26] = 4'd5; 
-		packet[OPCODE] = 1; // input 
-		packet[24:0] = data;
+		packet[ADDR_START:ADDR_END] = 4'd5; 
+		packet[OPCODE_START:OPCODE_END] = 1; // input 
+		packet[24:0] = 25'(data);
 
 		intf[0].Send(packet);
+
+		// send 25 inputs
+		for(int i = 1; i < 26; i=i+1) begin
+			data[i-1] = i%2;
+		end
+
+		packet[ADDR_START:ADDR_END] = 4'd5; 
+		packet[OPCODE_START:OPCODE_END] = 1; // input 
+		packet[24:0] = 25'(data);
+
+		intf[0].Send(packet);
+
+		// send 25 inputs
+		for(int i = 1; i < 26; i=i+1) begin
+			data[i-1] = i%2;
+		end
+
+		packet[ADDR_START:ADDR_END] = 4'd5; 
+		packet[OPCODE_START:OPCODE_END] = 1; // input 
+		packet[24:0] = 25'(data);
+
+		intf[0].Send(packet);
+
+		// send 25 inputs
+		for(int i = 1; i < 26; i=i+1) begin
+			data[i-1] = i%2;
+		end
+
+		packet[ADDR_START:ADDR_END] = 4'd5; 
+		packet[OPCODE_START:OPCODE_END] = 1; // input 
+		packet[24:0] = 25'(data);
+
+		intf[0].Send(packet);
+
+		// send timestep packet
+		packet = 0;
+		packet[ADDR_START:ADDR_END] = 4'd5; 
+		packet[OPCODE_START:OPCODE_END] = 15; // input 
+
+
+
+		intf[0].Send(packet);
+
+
+		// send 25 inputs
+		for(int i = 1; i < 26; i=i+1) begin
+			data[i-1] = i%2;
+		end
+
+		packet[ADDR_START:ADDR_END] = 4'd5; 
+		packet[OPCODE_START:OPCODE_END] = 1; // input 
+		packet[24:0] = 25'(data);
+
+		intf[0].Send(packet);
+
+
 		#100;
 		$stop;
 
