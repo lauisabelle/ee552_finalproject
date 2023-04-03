@@ -79,9 +79,10 @@ module spe (interface in, interface out);
         end
         else begin
           // Send request for previous timestep's membrane potential
+          packet = 0;
           packet[ADDR_START:ADDR_END] = `OMEM_ID;
-          packet[OPCODE_START:OPCODE_END] ={PE_ID, 1}; // request for previous membrane potential
-          packet[DATA_START:DATA_END] = 25'b0; // dummy
+          packet[OPCODE_START:OPCODE_END] = {PE_ID, 1}; // request for previous membrane potential
+          packet[DATA_START:DATA_END] = {PE_ID, 1}; // dummy
 
           // Send the request
           out.Send(packet);

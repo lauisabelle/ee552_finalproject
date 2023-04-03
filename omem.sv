@@ -6,16 +6,16 @@
 
 `timescale 1ns/1ns
 `define OP_SPE_0_SEND_DATA 0 // OPCODE: SPE 0 sends residual val and spike
-`define OP_SPE_1_SEND_DATA 2 // OPCODE: SPE 0 sends residual val and spike
-`define OP_SPE_2_SEND_DATA 4 // OPCODE: SPE 0 sends residual val and spike
-`define OP_SPE_3_SEND_DATA 6 // OPCODE: SPE 0 sends residual val and spike
-`define OP_SPE_4_SEND_DATA 8 // OPCODE: SPE 0 sends residual val and spike
+`define OP_SPE_1_SEND_DATA 2 // OPCODE: SPE 1 sends residual val and spike
+`define OP_SPE_2_SEND_DATA 4 // OPCODE: SPE 2 sends residual val and spike
+`define OP_SPE_3_SEND_DATA 6 // OPCODE: SPE 3 sends residual val and spike
+`define OP_SPE_4_SEND_DATA 8 // OPCODE: SPE 4 sends residual val and spike
 
 `define OP_SPE_0_REQ_DATA 1 // OPCODE: SPE 0 requests previous value
-`define OP_SPE_0_REQ_DATA 3 // OPCODE: SPE 0 requests previous value
-`define OP_SPE_0_REQ_DATA 5 // OPCODE: SPE 0 requests previous value
-`define OP_SPE_0_REQ_DATA 7 // OPCODE: SPE 0 requests previous value
-`define OP_SPE_0_REQ_DATA 9 // OPCODE: SPE 0 requests previous value
+`define OP_SPE_1_REQ_DATA 3 // OPCODE: SPE 0 requests previous value
+`define OP_SPE_2_REQ_DATA 5 // OPCODE: SPE 0 requests previous value
+`define OP_SPE_3_REQ_DATA 7 // OPCODE: SPE 0 requests previous value
+`define OP_SPE_4_REQ_DATA 9 // OPCODE: SPE 0 requests previous value
 
 `define OP_TIMESTEP_DONE 15 // OPCODE: PPE 9 requests more inputs
 
@@ -66,16 +66,16 @@ module omem (interface start_r, interface out_spike_data, interface out_spike_ad
     logic [(OUTPUT_SIZE*OUTPUT_SIZE)-1:0]t1_residue_mem ;
     logic [(OUTPUT_SIZE*OUTPUT_SIZE)-1:0]t2_residue_mem;
 
-    logic [SUM_WIDTH-1:0] new_potential;
+    logic [`SUM_WIDTH-1:0] new_potential;
     logic spike;
-    logic [SUM_WIDTH-1:0] spe_id;
+    logic [`SUM_WIDTH-1:0] spe_id;
 
 
-    logic [WIDTH_addr-1:0] pe0_ptr;
-    logic [WIDTH_addr-1:0] pe1_ptr;
-    logic [WIDTH_addr-1:0] pe2_ptr;
-    logic [WIDTH_addr-1:0] pe3_ptr;
-    logic [WIDTH_addr-1:0] pe4_ptr;
+    logic [WIDTH_addr-1:0] pe0_ptr = 0;
+    logic [WIDTH_addr-1:0] pe1_ptr = 1;
+    logic [WIDTH_addr-1:0] pe2_ptr = 2;
+    logic [WIDTH_addr-1:0] pe3_ptr = 3;
+    logic [WIDTH_addr-1:0] pe4_ptr = 4;
 
     logic [1:0] ts = 1;
 
@@ -84,15 +84,21 @@ module omem (interface start_r, interface out_spike_data, interface out_spike_ad
     always begin 
         router_in.Receive(packet);
         data = packet[DATA_START:DATA_END];
+	opcode = packet[OPCODE_START:OPCODE_END];
 
         // Even: Store data, Odd: Send data
         if(opcode % 2 == 0) begin
+		
             new_potential = data[DATA_START:DATA_END+1];
             spike = data[DATA_END]; // spike is LSB
+		$display("Received store request, data = %b", data);
         end
         else begin
+		
             spe_id = data[DATA_START:DATA_END+1];
+		$display("Received send request, data = %b", data);
         end
+	
 
 
         #BL;
@@ -101,10 +107,16 @@ module omem (interface start_r, interface out_spike_data, interface out_spike_ad
         case(opcode)
             `OP_SPE_0_SEND_DATA :  begin
                     if(ts == 1) begin
+                        $display("ts1: spike = %d", spike);
+                        $display("ts1: new_potential = %d", new_potential);
+                        $display("ts1: pe0_ptr = %d", pe0_ptr);
                         t1_spike_mem[pe0_ptr] = spike;
                         t1_residue_mem[pe0_ptr] = new_potential;
                     end
                     else if(ts == 2) begin
+                        $display("ts1: spike = %d", spike);
+                        $display("ts1: new_potential = %d", new_potential);
+                        $display("ts1: pe0_ptr = %d", pe0_ptr);
                         t2_spike_mem[pe0_ptr] = spike;
                         t2_residue_mem[pe0_ptr] = new_potential;
                     end
@@ -112,10 +124,16 @@ module omem (interface start_r, interface out_spike_data, interface out_spike_ad
             end
             `OP_SPE_1_SEND_DATA :  begin
                     if(ts == 1) begin
+                        $display("ts1: spike = %d", spike);
+                        $display("ts1: new_potential = %d", new_potential);
+                        $display("ts1: pe1_ptr = %d", pe1_ptr);
                         t1_spike_mem[pe1_ptr] = spike;
                         t1_residue_mem[pe1_ptr] = new_potential;
                     end
                     else if(ts == 2) begin
+                        $display("ts2: spike = %d", spike);
+                        $display("ts2: new_potential = %d", new_potential);
+                        $display("ts2: pe1_ptr = %d", pe1_ptr);
                         t2_spike_mem[pe1_ptr] = spike;
                         t2_residue_mem[pe1_ptr] = new_potential;
                     end
@@ -123,10 +141,16 @@ module omem (interface start_r, interface out_spike_data, interface out_spike_ad
             end
             `OP_SPE_2_SEND_DATA :  begin
                     if(ts == 1) begin
+                        $display("ts1: spike = %d", spike);
+                        $display("ts1: new_potential = %d", new_potential);
+                        $display("ts1: pe2_ptr = %d", pe2_ptr);
                         t1_spike_mem[pe2_ptr] = spike;
                         t1_residue_mem[pe2_ptr] = new_potential;
                     end
                     else if(ts == 2) begin
+                        $display("ts2: spike = %d", spike);
+                        $display("ts2: new_potential = %d", new_potential);
+                        $display("ts2: pe2_ptr = %d", pe2_ptr);
                         t2_spike_mem[pe2_ptr] = spike;
                         t2_residue_mem[pe2_ptr] = new_potential;
                     end
@@ -134,10 +158,16 @@ module omem (interface start_r, interface out_spike_data, interface out_spike_ad
             end
             `OP_SPE_3_SEND_DATA :  begin
                     if(ts == 1) begin
+                        $display("ts1: spike = %d", spike);
+                        $display("ts1: new_potential = %d", new_potential);
+                        $display("ts1: pe3_ptr = %d", pe3_ptr);
                         t1_spike_mem[pe3_ptr] = spike;
                         t1_residue_mem[pe3_ptr] = new_potential;
                     end
                     else if(ts == 2) begin
+                        $display("ts2: spike = %d", spike);
+                        $display("ts2: new_potential = %d", new_potential);
+                        $display("ts2: pe3_ptr = %d", pe3_ptr);
                         t2_spike_mem[pe3_ptr] = spike;
                         t2_residue_mem[pe3_ptr] = new_potential;
                     end
@@ -145,10 +175,16 @@ module omem (interface start_r, interface out_spike_data, interface out_spike_ad
             end
             `OP_SPE_4_SEND_DATA :  begin
                     if(ts == 1) begin
+                        $display("ts1: spike = %d", spike);
+                        $display("ts1: new_potential = %d", new_potential);
+                        $display("ts1: pe4_ptr = %d", pe4_ptr);
                         t1_spike_mem[pe4_ptr] = spike;
                         t1_residue_mem[pe4_ptr] = new_potential;
                     end
                     else if(ts == 2) begin
+                        $display("ts2: spike = %d", spike);
+                        $display("ts2: new_potential = %d", new_potential);
+                        $display("ts2: pe4_ptr = %d", pe4_ptr);
                         t2_spike_mem[pe4_ptr] = spike;
                         t2_residue_mem[pe4_ptr] = new_potential;
                     end
@@ -159,13 +195,17 @@ module omem (interface start_r, interface out_spike_data, interface out_spike_ad
                     packet[ADDR_START:ADDR_END] = spe_id; // respond to sender of request packet
                     packet[OPCODE_START:OPCODE_END] = spe_id; // irrelevant
                     packet[0] = t1_spike_mem[pe0_ptr]; // only t1 is used for requested residual data
-                    // don't increase pe0_ptr since we will store the received data at this idx
+                    $display("ts2: sending data to spe = %d", spe_id);
+                    $display("ts2: spike = %d", t1_spike_mem[pe0_ptr]);
                     router_out.Send(packet);
             end
             `OP_SPE_1_REQ_DATA :  begin
                     packet[ADDR_START:ADDR_END] = spe_id; // respond to sender of request packet
                     packet[OPCODE_START:OPCODE_END] = spe_id; // irrelevant
                     packet[0] = t1_spike_mem[pe1_ptr]; // only t1 is used for requested residual data
+                    $display("ts2: sending data to spe = %d", spe_id);
+                    $display("ts2: spike = %d", t1_spike_mem[pe1_ptr]);
+
                     // don't increase pe0_ptr since we will store the received data at this idx
                     router_out.Send(packet);
             end
@@ -173,6 +213,9 @@ module omem (interface start_r, interface out_spike_data, interface out_spike_ad
                     packet[ADDR_START:ADDR_END] = spe_id; // respond to sender of request packet
                     packet[OPCODE_START:OPCODE_END] = spe_id; // irrelevant
                     packet[0] = t1_spike_mem[pe2_ptr]; // only t1 is used for requested residual data
+                    $display("ts2: sending data to spe = %d", spe_id);
+                    $display("ts2: spike = %d", t1_spike_mem[pe2_ptr]);
+                    
                     // don't increase pe0_ptr since we will store the received data at this idx
                     router_out.Send(packet);
             end
@@ -180,6 +223,9 @@ module omem (interface start_r, interface out_spike_data, interface out_spike_ad
                     packet[ADDR_START:ADDR_END] = spe_id; // respond to sender of request packet
                     packet[OPCODE_START:OPCODE_END] = spe_id; // irrelevant
                     packet[0] = t1_spike_mem[pe3_ptr]; // only t1 is used for requested residual data
+                    $display("ts2: sending data to spe = %d", spe_id);
+                    $display("ts2: spike = %d", t1_spike_mem[pe3_ptr]);
+
                     // don't increase pe0_ptr since we will store the received data at this idx
                     router_out.Send(packet);
             end
@@ -187,19 +233,11 @@ module omem (interface start_r, interface out_spike_data, interface out_spike_ad
                     packet[ADDR_START:ADDR_END] = spe_id; // respond to sender of request packet
                     packet[OPCODE_START:OPCODE_END] = spe_id; // irrelevant
                     packet[0] = t1_spike_mem[pe4_ptr]; // only t1 is used for requested residual data
+                    $display("ts2: sending data to spe = %d", spe_id);
+                    $display("ts2: spike = %d", t1_spike_mem[pe4_ptr]);
+                    
                     // don't increase pe0_ptr since we will store the received data at this idx
                     router_out.Send(packet);
-            end
-
-
-            // THIS IS THE THING SIGNALING THE END DUMMY THERE IS NO OPCODE FOR THAT HERE
-            `OP_TIMESTEP_DONE : begin
-                ts = 2;
-                pe0_ptr = 0;
-                pe0_ptr = 1;
-                pe0_ptr = 2;
-                pe0_ptr = 3;
-                pe0_ptr = 4;
             end
         endcase
 
@@ -210,18 +248,23 @@ module omem (interface start_r, interface out_spike_data, interface out_spike_ad
             if(ts == 1) begin
                 // Send end of timestep packet to all modules
                 for(int i = 0; i < 11; i++) begin
+                    $display("Sending timestep packet to pe_id=%d", i);
                     packet = 0;
-                    packet[OPCODE_START:OPCODE_END] = `OP_TIMESTEP_DONE; // irrelevant
                     packet[ADDR_START:ADDR_END] = i; // respond to sender of request packet
+                    packet[OPCODE_START:OPCODE_END] = `OP_TIMESTEP_DONE; // irrelevant
                     router_out.Send(packet);
+                    #FL;
                 end
 
                 // Reset pointers for next timestep
                 pe0_ptr = 0;
-                pe0_ptr = 1;
-                pe0_ptr = 2;
-                pe0_ptr = 3;
-                pe0_ptr = 4;
+                pe1_ptr = 1;
+                pe2_ptr = 2;
+                pe3_ptr = 3;
+                pe4_ptr = 4;
+
+                // Set for next timestep
+                ts = 2;
 
             end
             
@@ -247,8 +290,8 @@ module omem (interface start_r, interface out_spike_data, interface out_spike_ad
                     out_spike_data.Send(t2_spike_mem[i]);
                 end
 
-                done_r.Receive(1);
-                
+                done_r.Send(1);
+
             end 
         end
     end
