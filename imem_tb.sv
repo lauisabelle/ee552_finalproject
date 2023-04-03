@@ -101,7 +101,9 @@ module imem_tb;
     
         // ** receiving input packets now ** 
         
+        // send requests for more inputs
         for(int i = 5; i < 10; i++) begin
+            packet = 0;
             packet[ADDR_START:ADDR_END] = 4'(i);
             packet[OPCODE_START:OPCODE_END] = 4'(i);
             packet[DATA_START:DATA_END] = 0;
@@ -109,20 +111,23 @@ module imem_tb;
             #FL;
         end
         for(int i = 5; i < 10; i++) begin
-            packet[ADDR_START:ADDR_END] = 11;
-            packet[OPCODE_START:OPCODE_END] = i;
+            packet = 0;
+            packet[ADDR_START:ADDR_END] = 4'(i);
+            packet[OPCODE_START:OPCODE_END] = 4'(i);
             packet[DATA_START:DATA_END] = 0;
             router_in.Send(packet);
             #FL;
         end
         for(int i = 5; i < 10; i++) begin
-            packet[ADDR_START:ADDR_END] = 11;
-            packet[OPCODE_START:OPCODE_END] = i;
+            packet = 0;
+            packet[ADDR_START:ADDR_END] = 4'(i);
+            packet[OPCODE_START:OPCODE_END] = 4'(i);
             packet[DATA_START:DATA_END] = 0;
             router_in.Send(packet);
             #FL;
         end
         for(int i = 5; i < 10; i++) begin
+            packet = 0;
             packet[ADDR_START:ADDR_END] = 4'(i);
             packet[OPCODE_START:OPCODE_END] = 4'(i);
             packet[DATA_START:DATA_END] = 0;
@@ -135,9 +140,9 @@ module imem_tb;
         // Timestep 2
 
         // signal end of timestep
-        packet[ADDR_START:ADDR_END] = 11;
-        packet[OPCODE_START:OPCODE_END] = 4'd10;
-        packet[DATA_START:DATA_END] = 0;
+        packet[ADDR_START:ADDR_END] = 4'd11;
+        packet[OPCODE_START:OPCODE_END] = 4'd15;
+        packet[DATA_START:DATA_END] = 25'b0;
         router_in.Send(packet);
         #FL;
   
@@ -147,28 +152,28 @@ module imem_tb;
         for(int i = 5; i < 10; i++) begin
             packet[ADDR_START:ADDR_END] = 4'(i);
             packet[OPCODE_START:OPCODE_END] = 4'(i);
-            packet[DATA_START:DATA_END] = 0;
+            packet[DATA_START:DATA_END] = 25'b0;
             router_in.Send(packet);
             #FL;
         end
         for(int i = 5; i < 10; i++) begin
-            packet[ADDR_START:ADDR_END] = 11;
-            packet[OPCODE_START:OPCODE_END] = i;
-            packet[DATA_START:DATA_END] = 0;
+            packet[ADDR_START:ADDR_END] = 4'd11;
+            packet[OPCODE_START:OPCODE_END] = 4'(i);
+            packet[DATA_START:DATA_END] = 25'b0;
             router_in.Send(packet);
             #FL;
         end
         for(int i = 5; i < 10; i++) begin
-            packet[ADDR_START:ADDR_END] = 11;
-            packet[OPCODE_START:OPCODE_END] = i;
-            packet[DATA_START:DATA_END] = 0;
+            packet[ADDR_START:ADDR_END] = 4'd11;
+            packet[OPCODE_START:OPCODE_END] = 4'(i);
+            packet[DATA_START:DATA_END] = 25'b0;
             router_in.Send(packet);
             #FL;
         end
         for(int i = 5; i < 10; i++) begin
             packet[ADDR_START:ADDR_END] = 4'(i);
             packet[OPCODE_START:OPCODE_END] = 4'(i);
-            packet[DATA_START:DATA_END] = 0;
+            packet[DATA_START:DATA_END] = 25'b0;
             router_in.Send(packet);
             #FL;
         end

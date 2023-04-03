@@ -16,7 +16,7 @@
 `define SUM_WIDTH 13
 `define NUM_WEIGHTS 5 // local storage upper bound
 `define NUM_INPUTS 25
-`define IMEM_ID 10
+`define IMEM_ID 11
 
 
 import SystemVerilogCSP::*;
@@ -140,13 +140,13 @@ module imem (interface load_start, interface ifmap_addr, interface ifmap_data,
                     end
                     // Send 1 row of data (25 inputs) to each of the PE modules
                     for(int i = 0; i < 5; i++) begin
-                        packet[ADDR_START:ADDR_END] = i+5;
-                        packet[OPCODE_START:OPCODE_END] = `OP_PPE_INPUT; 
+                        packet[ADDR_START:ADDR_END] = 4'(i+5);
+                        packet[OPCODE_START:OPCODE_END] = 4'(`OP_PPE_INPUT); 
                         if(ts == 1) begin
-			                packet[DATA_START:DATA_END] = t1_mem[((i+1) * IFMAP_SIZE) - 1 -: IFMAP_SIZE];	
+			                packet[DATA_START:DATA_END] = 25'(t1_mem[((i+1) * IFMAP_SIZE) - 1 -: IFMAP_SIZE]);	
                         end
                         else begin
-			                packet[DATA_START:DATA_END] = t2_mem[((i+1) * IFMAP_SIZE) - 1 -: IFMAP_SIZE];
+			                packet[DATA_START:DATA_END] = 25'(t2_mem[((i+1) * IFMAP_SIZE) - 1 -: IFMAP_SIZE]);
                         end
                         router_out.Send(packet);
                         #FL;
@@ -161,16 +161,16 @@ module imem (interface load_start, interface ifmap_addr, interface ifmap_data,
             end
             
             `OP_PPE_5_REQ_INPUT : begin
-                    packet[ADDR_START:ADDR_END] = `OP_PPE_5_REQ_INPUT; // SEND BACK TO WHERE IT CAME FROM
-                    packet[OPCODE_START:OPCODE_END] = `OP_PPE_INPUT; 
+                    packet[ADDR_START:ADDR_END] = 4'(`OP_PPE_5_REQ_INPUT); // SEND BACK TO WHERE IT CAME FROM
+                    packet[OPCODE_START:OPCODE_END] = 4'(`OP_PPE_INPUT); 
                     $display("ptr = %d", pe5_ptr);
                     if(ts == 1) begin
                         $display("val = %b", t1_mem[(pe5_ptr + 24) -: IFMAP_SIZE]);
-                        packet[DATA_START:DATA_END] = t1_mem[(pe5_ptr + 24) -: IFMAP_SIZE];
+                        packet[DATA_START:DATA_END] = 25'(t1_mem[(pe5_ptr + 24) -: IFMAP_SIZE]);
                     end
                     else begin
                         $display("val = %b", t2_mem[(pe5_ptr + 24) -: IFMAP_SIZE]);
-                        packet[DATA_START:DATA_END] = t2_mem[(pe5_ptr + 24) -: IFMAP_SIZE];
+                        packet[DATA_START:DATA_END] = 25'(t2_mem[(pe5_ptr + 24) -: IFMAP_SIZE]);
                     end
                     router_out.Send(packet);
                     #FL;
@@ -179,16 +179,16 @@ module imem (interface load_start, interface ifmap_addr, interface ifmap_data,
             end
 
             `OP_PPE_6_REQ_INPUT : begin
-                    packet[ADDR_START:ADDR_END] = `OP_PPE_6_REQ_INPUT;
-                    packet[OPCODE_START:OPCODE_END] = `OP_PPE_INPUT; 
+                    packet[ADDR_START:ADDR_END] = 4'(`OP_PPE_6_REQ_INPUT);
+                    packet[OPCODE_START:OPCODE_END] = 4'(`OP_PPE_INPUT); 
                     $display("ptr = %d", pe6_ptr);
                     if(ts == 1) begin
                         $display("val = %b", t1_mem[(pe6_ptr + 24) -: IFMAP_SIZE]);
-			            packet[DATA_START:DATA_END] = t1_mem[(pe6_ptr + 24) -: IFMAP_SIZE];
+			            packet[DATA_START:DATA_END] = 25'(t1_mem[(pe6_ptr + 24) -: IFMAP_SIZE]);
                     end
                     else begin
                         $display("val = %b", t2_mem[(pe6_ptr + 24) -: IFMAP_SIZE]);
-			            packet[DATA_START:DATA_END] = t2_mem[(pe6_ptr + 24) -: IFMAP_SIZE];
+			            packet[DATA_START:DATA_END] = 25'(t2_mem[(pe6_ptr + 24) -: IFMAP_SIZE]);
                     end
                     router_out.Send(packet);
                     #FL;
@@ -197,16 +197,16 @@ module imem (interface load_start, interface ifmap_addr, interface ifmap_data,
             end
 
             `OP_PPE_7_REQ_INPUT : begin
-                    packet[ADDR_START:ADDR_END] = `OP_PPE_7_REQ_INPUT;
-                    packet[OPCODE_START:OPCODE_END] = `OP_PPE_INPUT; 
+                    packet[ADDR_START:ADDR_END] = 4'(`OP_PPE_7_REQ_INPUT);
+                    packet[OPCODE_START:OPCODE_END] = 4'(`OP_PPE_INPUT); 
                     $display("ptr = %d", pe7_ptr);
                     if(ts == 1) begin
                         $display("val = %b", t1_mem[(pe7_ptr + 24) -: IFMAP_SIZE]);
-			            packet[DATA_START:DATA_END] = t1_mem[(pe7_ptr + 24) -: IFMAP_SIZE];
+			            packet[DATA_START:DATA_END] = 25'(t1_mem[(pe7_ptr + 24) -: IFMAP_SIZE]);
                     end
                     else begin
                         $display("val = %b", t2_mem[(pe7_ptr + 24) -: IFMAP_SIZE]);
-			            packet[DATA_START:DATA_END] = t2_mem[(pe7_ptr + 24) -: IFMAP_SIZE];
+			            packet[DATA_START:DATA_END] = 25'(t2_mem[(pe7_ptr + 24) -: IFMAP_SIZE]);
                     end
                     router_out.Send(packet);
                     #FL;
@@ -215,16 +215,16 @@ module imem (interface load_start, interface ifmap_addr, interface ifmap_data,
             end
 
             `OP_PPE_8_REQ_INPUT : begin
-                    packet[ADDR_START:ADDR_END] = `OP_PPE_8_REQ_INPUT;
-                    packet[OPCODE_START:OPCODE_END] = `OP_PPE_INPUT; 
+                    packet[ADDR_START:ADDR_END] = 4'(`OP_PPE_8_REQ_INPUT);
+                    packet[OPCODE_START:OPCODE_END] = 4'(`OP_PPE_INPUT); 
                     $display("ptr = %d", pe8_ptr);
                     if(ts == 1) begin
                         $display("val = %b", t1_mem[(pe8_ptr + 24) -: IFMAP_SIZE]);
-			            packet[DATA_START:DATA_END] = t1_mem[(pe8_ptr + 24) -: IFMAP_SIZE];
+			            packet[DATA_START:DATA_END] = 25'(t1_mem[(pe8_ptr + 24) -: IFMAP_SIZE]);
                     end
                     else begin
                         $display("val = %b", t2_mem[(pe8_ptr + 24) -: IFMAP_SIZE]);
-                        packet[DATA_START:DATA_END] = t2_mem[(pe8_ptr + 24) -: IFMAP_SIZE];
+                        packet[DATA_START:DATA_END] = 25'(t2_mem[(pe8_ptr + 24) -: IFMAP_SIZE]);
                     end
                     router_out.Send(packet);
                     #FL;
@@ -233,16 +233,16 @@ module imem (interface load_start, interface ifmap_addr, interface ifmap_data,
             end
 
             `OP_PPE_9_REQ_INPUT : begin
-                    packet[ADDR_START:ADDR_END] = `OP_PPE_9_REQ_INPUT;
-                    packet[OPCODE_START:OPCODE_END] = `OP_PPE_INPUT; 
+                    packet[ADDR_START:ADDR_END] = 4'(`OP_PPE_9_REQ_INPUT);
+                    packet[OPCODE_START:OPCODE_END] = 4'(`OP_PPE_INPUT); 
                     $display("ptr = %d", pe9_ptr);
                     if(ts == 1) begin
                         $display("val = %b", t1_mem[(pe9_ptr + 24) -: IFMAP_SIZE]);
-			            packet[DATA_START:DATA_END] = t1_mem[(pe9_ptr + 24) -: IFMAP_SIZE];
+			            packet[DATA_START:DATA_END] = 25'(t1_mem[(pe9_ptr + 24) -: IFMAP_SIZE]);
                     end
                     else begin
                         $display("val = %b", t2_mem[(pe9_ptr + 24) -: IFMAP_SIZE]);
-			            packet[DATA_START:DATA_END] = t2_mem[(pe9_ptr + 24) -: IFMAP_SIZE];
+			            packet[DATA_START:DATA_END] = 25'(t2_mem[(pe9_ptr + 24) -: IFMAP_SIZE]);
                     end
                     router_out.Send(packet);
                     #FL;
@@ -250,15 +250,6 @@ module imem (interface load_start, interface ifmap_addr, interface ifmap_data,
                     pe9_ptr += 5 * IFMAP_SIZE; // prepare for next set
             end
 
-            // `OP_TIMESTEP_DONE : begin 
-            //     ts = 2;
-            //     // Initialize the pointers
-            //     pe5_ptr = 5 * IFMAP_SIZE;
-            //     pe6_ptr = 6 * IFMAP_SIZE;
-            //     pe7_ptr = 7 * IFMAP_SIZE;
-            //     pe8_ptr = 8 * IFMAP_SIZE;
-            //     pe9_ptr = 9 * IFMAP_SIZE;
-            // end
 
         endcase
     end
