@@ -45,19 +45,19 @@ module spe_tb;
 
 		// send timestep flag
         packet[ADDR_START:ADDR_END] = 4'd0;  
-        packet[OPCODE_START:OPCODE_END] = 4'd1; // indicate timestep done
+        packet[OPCODE_START:OPCODE_END] = 4'd15; // indicate timestep done
         packet[DATA_START:DATA_END] = 25'b0; // irrelevant
         intf[0].Send(packet);
 	
-	#FL;
+		#FL;
 
-	// create partial sum packets and send
+		// create partial sum packets and send
         for(int i = 0; i < 5; i++) begin
             packet[ADDR_START:ADDR_END] = 4'b0;  
             packet[OPCODE_START:OPCODE_END] = 4'b0; 
             packet[DATA_START:DATA_END] = 25'(i);
             intf[0].Send(packet);
-	    #FL;	
+	    	#FL;	
         end
 		
         #FL;
@@ -66,7 +66,7 @@ module spe_tb;
 
 
         // send previous potential
-	packet[ADDR_START:ADDR_END] = 4'd0;  
+		packet[ADDR_START:ADDR_END] = 4'd0;  
         packet[OPCODE_START:OPCODE_END] = 4'd2; // indicate previous potential
         packet[DATA_START:DATA_END] = 25'd60; // random
         intf[0].Send(packet);
