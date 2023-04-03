@@ -187,47 +187,47 @@ module omem (interface start_r, interface out_spike_data, interface out_spike_ad
             end
 
             `OP_SPE_0_REQ_DATA :  begin
-                    packet[ADDR_START:ADDR_END] = spe_id; // respond to sender of request packet
-                    packet[OPCODE_START:OPCODE_END] = spe_id; // irrelevant
-                    packet[0] = t1_spike_mem[pe0_ptr]; // only t1 is used for requested residual data
+                    packet[ADDR_START:ADDR_END] = 4'(spe_id); // respond to sender of request packet
+                    packet[OPCODE_START:OPCODE_END] = 4'(spe_id); // irrelevant
+                    packet[DATA_START:DATA_END] = 25'(t1_residue_mem[pe0_ptr]); // only t1 is used for requested residual data
                     $display("ts2: sending data to spe = %d", spe_id);
-                    $display("ts2: spike = %d", t1_spike_mem[pe0_ptr]);
+                    $display("ts2: residue = %d", t1_residue_mem[pe0_ptr]);
                     router_out.Send(packet); 
                     #FL;  
             end
             `OP_SPE_1_REQ_DATA :  begin
-                    packet[ADDR_START:ADDR_END] = spe_id; // respond to sender of request packet
-                    packet[OPCODE_START:OPCODE_END] = spe_id; // irrelevant
-                    packet[0] = t1_spike_mem[pe1_ptr]; // only t1 is used for requested residual data
+                    packet[ADDR_START:ADDR_END] = 4'(spe_id); // respond to sender of request packet
+                    packet[OPCODE_START:OPCODE_END] = 4'(spe_id); // irrelevant
+                    packet[DATA_START:DATA_END] = 25'(t1_residue_mem[pe1_ptr]); // only t1 is used for requested residual data
                     $display("ts2: sending data to spe = %d", spe_id);
-                    $display("ts2: spike = %d", t1_spike_mem[pe1_ptr]);
+                    $display("ts2: residue = %d", t1_residue_mem[pe1_ptr]);
                     router_out.Send(packet);
                     #FL;  
             end
             `OP_SPE_2_REQ_DATA :  begin
-                    packet[ADDR_START:ADDR_END] = spe_id; // respond to sender of request packet
-                    packet[OPCODE_START:OPCODE_END] = spe_id; // irrelevant
-                    packet[0] = t1_spike_mem[pe2_ptr]; // only t1 is used for requested residual data
+                    packet[ADDR_START:ADDR_END] = 4'(spe_id); // respond to sender of request packet
+                    packet[OPCODE_START:OPCODE_END] = 4'(spe_id); // irrelevant
+                    packet[DATA_START:DATA_END] = 25'(t1_residue_mem[pe2_ptr]); // only t1 is used for requested residual data
                     $display("ts2: sending data to spe = %d", spe_id);
-                    $display("ts2: spike = %d", t1_spike_mem[pe2_ptr]);
+                    $display("ts2: residue = %d", t1_residue_mem[pe2_ptr]);
                     router_out.Send(packet);
                     #FL;  
             end
             `OP_SPE_3_REQ_DATA :  begin
-                    packet[ADDR_START:ADDR_END] = spe_id; // respond to sender of request packet
-                    packet[OPCODE_START:OPCODE_END] = spe_id; // irrelevant
-                    packet[0] = t1_spike_mem[pe3_ptr]; // only t1 is used for requested residual data
+                    packet[ADDR_START:ADDR_END] = 4'(spe_id); // respond to sender of request packet
+                    packet[OPCODE_START:OPCODE_END] = 4'(spe_id); // irrelevant
+                    packet[DATA_START:DATA_END] = 25'(t1_residue_mem[pe3_ptr]); // only t1 is used for requested residual data
                     $display("ts2: sending data to spe = %d", spe_id);
-                    $display("ts2: spike = %d", t1_spike_mem[pe3_ptr]);
+                    $display("ts2: residue = %d", t1_residue_mem[pe3_ptr]);
                     router_out.Send(packet);
                     #FL;  
             end
             `OP_SPE_4_REQ_DATA :  begin
-                    packet[ADDR_START:ADDR_END] = spe_id; // respond to sender of request packet
-                    packet[OPCODE_START:OPCODE_END] = spe_id; // irrelevant
-                    packet[0] = t1_spike_mem[pe4_ptr]; // only t1 is used for requested residual data
+                    packet[ADDR_START:ADDR_END] = 4'(spe_id); // respond to sender of request packet
+                    packet[OPCODE_START:OPCODE_END] = 4'(spe_id); // irrelevant
+                    packet[DATA_START:DATA_END] = 25'(t1_residue_mem[pe4_ptr]); // only t1 is used for requested residual data
                     $display("ts2: sending data to spe = %d", spe_id);
-                    $display("ts2: spike = %d", t1_spike_mem[pe4_ptr]);
+                    $display("ts2: residue = %d", t1_residue_mem[pe4_ptr]);
                     router_out.Send(packet);
                     #FL;  
             end
@@ -241,8 +241,8 @@ module omem (interface start_r, interface out_spike_data, interface out_spike_ad
                 for(int i = 0; i < 11; i++) begin
                     $display("Sending timestep packet to pe_id=%d", i);
                     packet = 0;
-                    packet[ADDR_START:ADDR_END] = i; // respond to sender of request packet
-                    packet[OPCODE_START:OPCODE_END] = `OP_TIMESTEP_DONE; // irrelevant
+                    packet[ADDR_START:ADDR_END] = 4'(i); // respond to sender of request packet
+                    packet[OPCODE_START:OPCODE_END] = 4'(`OP_TIMESTEP_DONE); // irrelevant
                     router_out.Send(packet);
                     #FL;
                 end
