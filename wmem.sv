@@ -5,12 +5,13 @@
 
 `timescale 1ns/1ns
 `define OP_WEIGHT 0 // OPCODE: Send to PPE modules
+`define OP_WEIGHTS_DONE 0
 `define OP_TIMESTEP_DONE 15 
 `define WEIGHT_WIDTH 8
 `define SUM_WIDTH 13
 `define NUM_WEIGHTS 5 // local storage upper bound
 `define NUM_INPUTS 25
-`define IMEM_ID 10
+`define IMEM_ID 11
 
 
 import SystemVerilogCSP::*;
@@ -89,6 +90,16 @@ module wmem (interface load_start, interface filter_addr, interface filter_data,
 	    current_PPE += 1;
 		$display("i=%d", i);
         end
+
+        // Send signal to IMEM that weights have been dispersed
+        packet = 0;
+        packet[ADDR_START:ADDR_END] = 4'(`IMEM_ID);
+        packet[OPCODE_START:OPCODE_END] = 4'(`OP_WEIGHTS_DONE);
+        packet[DATA_START:DATA_END] = 25'(0); // irrelevant
+        $display("Sending weights done packet to IMEM");
+        router_out.Send(packet); // send first 3 weights
+        #FL;
+
     end
 
 
