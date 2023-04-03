@@ -61,7 +61,7 @@ module omem_tb;
             packet = 0;
             packet[ADDR_START:ADDR_END] = 4'd12;  
             packet[OPCODE_START:OPCODE_END] = {3'(i%5), 1'(1)}; 
-            packet[DATA_START:DATA_END] = {24'(i), 1'(i%2)};
+            packet[DATA_START:DATA_END] = {24'(i%5), 1'(i%2)};
             $display("Sending req for prev, packet=%b", packet);
             router_in.Send(packet);
 		    #FL;
@@ -78,7 +78,7 @@ module omem_tb;
             packet[ADDR_START:ADDR_END] = 4'd12;  
             packet[OPCODE_START:OPCODE_END] = {3'(i%5), 1'(0)}; 
             packet[DATA_START:DATA_END] = ({24'(i), 1'(i%2)});
-            $display("i=%d, data = %b", i, {24'(i), 1'(i%2)});
+            // $display("i=%d, data = %b", i, {24'(i), 1'(i%2)});
             $display("Sending new data, packet=%b", packet);
             
             router_in.Send(packet);

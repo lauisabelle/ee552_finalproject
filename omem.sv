@@ -92,8 +92,8 @@ module omem (interface start_r, interface out_spike_data, interface out_spike_ad
 		    $display("Received store request, data = %b", data);
         end
         else begin
-            spe_id = data[DATA_START:DATA_END+1];
-		    $display("Received send request, data = %b", data);
+            spe_id = packet[OPCODE_START:OPCODE_END+1];
+		    $display("Received send request from spe_id= %b", spe_id);
         end
 
         #BL;
