@@ -48,13 +48,13 @@ module omem_tb;
             packet[ADDR_START:ADDR_END] = 4'd12;  
             packet[OPCODE_START:OPCODE_END] = {3'(i%5), 1'(0)}; 
             packet[DATA_START:DATA_END] = {24'(i), 1'(i%2)};
-		$display("Sending data = %b", {24'(i), 1'(i%2)});
-		$display("Opcode = %d", {3'(i%5), 1'(0)});
+            $display("Sending data = %b", {24'(i), 1'(i%2)});
+            $display("Opcode = %d", {3'(i%5), 1'(0)});
             router_in.Send(packet);
 		#FL;
         end
 
-	#200;
+	    #200;
 
         // Send timestep 2 requests
         for(int i = 0; i < 21*21; i++) begin
@@ -82,38 +82,37 @@ module omem_tb;
             $display("Sending new data, packet=%b", packet);
             
             router_in.Send(packet);
-		#FL;
+		    #FL;
 
         end
 	
-	$display("waiting for start");
+	    $display("waiting for start");
         start_r.Receive(val);
-	$display("received start");
-	#FL;
+	    $display("received start");
+	    #FL;
 
         ts_r.Receive(val);
         layer_r.Receive(val);
-	#FL;
+	    #FL;
 
         for(int i = 0; i < 21*21; i++) begin
             out_spike_addr.Receive(spike_addr);
             out_spike_data.Receive(spike_data);
-		#FL;
+		    #FL;
         end
 
         ts_r.Receive(val);
         layer_r.Receive(val);
-	#FL;
+	    #FL;
 
         for(int i = 0; i < 21*21; i++) begin
             out_spike_addr.Receive(spike_addr);
             out_spike_data.Receive(spike_data);
-	#FL;
+	        #FL;
         end
 
         done_r.Receive(val);
-	#FL;
-
+	    #FL;
 		
 	#500000;
 	$stop;

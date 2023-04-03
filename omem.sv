@@ -1,4 +1,3 @@
-
 // EE 552 Final Project Spring 2023
 // Written by Izzy Lau
 // Defines the Output Memory module which stores spikes and residual values. 
@@ -31,9 +30,9 @@ import SystemVerilogCSP::*;
 module omem (interface start_r, interface out_spike_data, interface out_spike_addr, 
         interface ts_r, interface layer_r, interface done_r, interface router_in, interface router_out);
 
-  // Packet Format
-  // |   32 - 29    |    28 - 25   |   24 - 0 |
-  // | dest address |    opcode    |   data   |
+    // Packet Format
+    // |   32 - 29    |    28 - 25   |   24 - 0 |
+    // | dest address |    opcode    |   data   |
     parameter ADDR_START = 32;
     parameter ADDR_END = 29;
     parameter OPCODE_START = 28;
@@ -49,8 +48,8 @@ module omem (interface start_r, interface out_spike_data, interface out_spike_ad
     parameter OUTPUT_SIZE = 21;
 
     // Handshaking
-    parameter FL = 2;
-    parameter BL = 2;
+    parameter FL = 12;
+    parameter BL = 4;
 
     // Packet storage
     logic [ADDR_START:0] packet;
@@ -80,26 +79,22 @@ module omem (interface start_r, interface out_spike_data, interface out_spike_ad
     logic [1:0] ts = 1;
 
 
-    // Receive spikes and outputs
+    // Receive spikes, residual values, and requests for previous values
     always begin 
         router_in.Receive(packet);
         data = packet[DATA_START:DATA_END];
-	opcode = packet[OPCODE_START:OPCODE_END];
+	    opcode = packet[OPCODE_START:OPCODE_END];
 
         // Even: Store data, Odd: Send data
         if(opcode % 2 == 0) begin
-		
             new_potential = data[DATA_START:DATA_END+1];
             spike = data[DATA_END]; // spike is LSB
-		$display("Received store request, data = %b", data);
+		    $display("Received store request, data = %b", data);
         end
         else begin
-		
             spe_id = data[DATA_START:DATA_END+1];
-		$display("Received send request, data = %b", data);
+		    $display("Received send request, data = %b", data);
         end
-	
-
 
         #BL;
         packet = 0;
@@ -197,7 +192,8 @@ module omem (interface start_r, interface out_spike_data, interface out_spike_ad
                     packet[0] = t1_spike_mem[pe0_ptr]; // only t1 is used for requested residual data
                     $display("ts2: sending data to spe = %d", spe_id);
                     $display("ts2: spike = %d", t1_spike_mem[pe0_ptr]);
-                    router_out.Send(packet);
+                    router_out.Send(packet); 
+                    #FL;  
             end
             `OP_SPE_1_REQ_DATA :  begin
                     packet[ADDR_START:ADDR_END] = spe_id; // respond to sender of request packet
@@ -205,9 +201,8 @@ module omem (interface start_r, interface out_spike_data, interface out_spike_ad
                     packet[0] = t1_spike_mem[pe1_ptr]; // only t1 is used for requested residual data
                     $display("ts2: sending data to spe = %d", spe_id);
                     $display("ts2: spike = %d", t1_spike_mem[pe1_ptr]);
-
-                    // don't increase pe0_ptr since we will store the received data at this idx
                     router_out.Send(packet);
+                    #FL;  
             end
             `OP_SPE_2_REQ_DATA :  begin
                     packet[ADDR_START:ADDR_END] = spe_id; // respond to sender of request packet
@@ -215,9 +210,8 @@ module omem (interface start_r, interface out_spike_data, interface out_spike_ad
                     packet[0] = t1_spike_mem[pe2_ptr]; // only t1 is used for requested residual data
                     $display("ts2: sending data to spe = %d", spe_id);
                     $display("ts2: spike = %d", t1_spike_mem[pe2_ptr]);
-                    
-                    // don't increase pe0_ptr since we will store the received data at this idx
                     router_out.Send(packet);
+                    #FL;  
             end
             `OP_SPE_3_REQ_DATA :  begin
                     packet[ADDR_START:ADDR_END] = spe_id; // respond to sender of request packet
@@ -225,9 +219,8 @@ module omem (interface start_r, interface out_spike_data, interface out_spike_ad
                     packet[0] = t1_spike_mem[pe3_ptr]; // only t1 is used for requested residual data
                     $display("ts2: sending data to spe = %d", spe_id);
                     $display("ts2: spike = %d", t1_spike_mem[pe3_ptr]);
-
-                    // don't increase pe0_ptr since we will store the received data at this idx
                     router_out.Send(packet);
+                    #FL;  
             end
             `OP_SPE_4_REQ_DATA :  begin
                     packet[ADDR_START:ADDR_END] = spe_id; // respond to sender of request packet
@@ -235,15 +228,13 @@ module omem (interface start_r, interface out_spike_data, interface out_spike_ad
                     packet[0] = t1_spike_mem[pe4_ptr]; // only t1 is used for requested residual data
                     $display("ts2: sending data to spe = %d", spe_id);
                     $display("ts2: spike = %d", t1_spike_mem[pe4_ptr]);
-                    
-                    // don't increase pe0_ptr since we will store the received data at this idx
                     router_out.Send(packet);
+                    #FL;  
             end
         endcase
 
         // End of timestep (received all sums)
         if(pe0_ptr == 445) begin // last index is 440, then 5 was added
-            
 
             if(ts == 1) begin
                 // Send end of timestep packet to all modules
@@ -272,30 +263,29 @@ module omem (interface start_r, interface out_spike_data, interface out_spike_ad
             else begin
 
                 start_r.Send(1);
-                
-                // Send data associated with timestep 1
                 ts_r.Send(1);
                 layer_r.Send(1);
+                #FL;
 
                 for(int i = 0; i < OUTPUT_SIZE * OUTPUT_SIZE; i++) begin
                     out_spike_addr.Send(i);
                     out_spike_data.Send(t1_spike_mem[i]);
+                    #FL;
                 end
 
                 ts_r.Send(2);
                 layer_r.Send(1);
+                #FL;
 
                 for(int i = 0; i < OUTPUT_SIZE * OUTPUT_SIZE; i++) begin
                     out_spike_addr.Send(i);
                     out_spike_data.Send(t2_spike_mem[i]);
+                    #FL;
                 end
 
                 done_r.Send(1);
-
+                #FL;
             end 
         end
     end
-
-
-
 endmodule
