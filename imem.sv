@@ -42,8 +42,8 @@ module imem (interface load_start, interface ifmap_addr, interface ifmap_data,
     parameter OUTPUT_SIZE = 21;
 
     // Handshaking
-    parameter FL = 2;
-    parameter BL = 2;
+    parameter FL = 12;
+    parameter BL = 4;
 
     // Packet storage
     logic [ADDR_START:0] packet;
