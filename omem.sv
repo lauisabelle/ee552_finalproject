@@ -62,8 +62,8 @@ module omem (interface start_r, interface out_spike_data, interface out_spike_ad
 	logic [(OUTPUT_SIZE*OUTPUT_SIZE)-1:0]t1_spike_mem ;
     logic [(OUTPUT_SIZE*OUTPUT_SIZE)-1:0]t2_spike_mem;
 
-    logic [(OUTPUT_SIZE*OUTPUT_SIZE)-1:0]t1_residue_mem ;
-    logic [(OUTPUT_SIZE*OUTPUT_SIZE)-1:0]t2_residue_mem;
+    logic [`SUM_WIDTH-1:0] t1_residue_mem [(OUTPUT_SIZE*OUTPUT_SIZE)-1:0];
+    logic [`SUM_WIDTH-1:0] t2_residue_mem [(OUTPUT_SIZE*OUTPUT_SIZE)-1:0];
 
     logic [`SUM_WIDTH-1:0] new_potential;
     logic spike;
