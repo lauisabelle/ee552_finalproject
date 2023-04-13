@@ -1,5 +1,5 @@
 
-// EE 552 Final Project Ã¢ÂÂ Spring 2023
+// EE 552 Final Project ÃÂ¢ÃÂÃÂ Spring 2023
 // Written by Izzy Lau
 // Describes the various PE elements we use in the final project
 
@@ -19,7 +19,7 @@ module ppe_tb;
 	//Interface Vector instatiation: 4-phase bundled data channel
 	Channel #(.hsProtocol(P4PhaseBD), .WIDTH(33)) intf  [1:0] (); 
 
-	ppe_decomposed ppe_mod(.in(intf[0]), .out(intf[1]));
+	ppe ppe_mod(.ppe_in(intf[0]), .ppe_out(intf[1]));
 
 	// Channel #(.hsProtocol(P4PhaseBD), .WIDTH(1)) start (); 
 	data_bucket #(.WIDTH(33)) db(intf[1]);
