@@ -1,5 +1,5 @@
 
-// EE 552 Final Project Ã¢ÂÂ Spring 2023
+// EE 552 Final Project Spring 2023
 // Written by Izzy Lau
 // Defines the Partial PE module which computes partial sums
 
@@ -20,7 +20,7 @@
 import SystemVerilogCSP::*;
 
 module weight_rf(interface command, interface write_addr, interface write_data, interface read_addr, interface read_data);
-	logic [3:0] cmd;
+	logic cmd;
 	logic [`WEIGHT_WIDTH-1:0] weights_mem [`NUM_WEIGHTS:0]; // array of MAX_NUM_WEIGHTS 8-bit elements
 	logic [`WEIGHT_WIDTH-1:0] weight;
 	logic [$clog2(`NUM_WEIGHTS) - 1:0] waddr;
@@ -52,8 +52,8 @@ endmodule
 
 
 module input_rf(interface command, interface write_data, interface write_addr, interface read_addr, interface read_data);
-	logic [3:0] cmd;
-	logic signed [`NUM_INPUTS-1:0] inputs_mem; // array of MAX_NUM_INPUTS 1-bit elements
+	logic cmd;
+	logic [`NUM_INPUTS-1:0] inputs_mem; // array of MAX_NUM_INPUTS 1-bit elements
 	logic [`NUM_INPUTS-1:0] inputs;
 	logic [$clog2(`NUM_INPUTS) - 1:0] raddr;
 
@@ -89,7 +89,7 @@ module packetizer(interface dest_address, interface opcode, interface packet_dat
 
 	logic [ADDR_START:0] packet;
 
-    logic [OPCODE_START:OPCODE_END] op;
+    logic [OPCODE_START-OPCODE_END:0] op;
     logic signed [DATA_START-DATA_END:0] data;
 	logic [ADDR_START-ADDR_END:0] addr;
 	logic dn;
@@ -106,7 +106,7 @@ module packetizer(interface dest_address, interface opcode, interface packet_dat
 
 	always begin
 		packet_data.Receive(data);
-		packet[DATA_START:DATA_END] = 25'(data)
+		packet[DATA_START:DATA_END] = 25'(data);
 	end
 
 	always begin
@@ -130,13 +130,13 @@ module depacketizer(interface depacketizer_in, interface dest_address, interface
 
 	logic [ADDR_START:0] packet;
 
-	logic dn;
-
 	always begin
 		depacketizer_in.Receive(packet);
-		dest_address.Send(packet[ADDR_START:ADDR_END]);
-		opcode.Send(packet[OPCODE_START:OPCODE_END]);
-		packet_data.Send(packet[DATA_START:DATA_END]);
+		fork
+			dest_address.Send(packet[ADDR_START:ADDR_END]);
+			opcode.Send(packet[OPCODE_START:OPCODE_END]);
+			packet_data.Send(packet[DATA_START:DATA_END]);
+		join
 	end
 
 endmodule
@@ -152,11 +152,9 @@ module ppe (interface in, interface out);
 	parameter OPCODE_END = 25;
 	parameter DATA_START = 24;
 	parameter DATA_END = 0;
-	parameter PE_ID = -1;
-
-	// IFMAP and Kernel sizes
 	parameter FILTER_SIZE = 5;
 	parameter IFMAP_SIZE = 25;
+	parameter PE_ID = -1;
 
 	// Handshaking
 	parameter FL = 2;
@@ -164,43 +162,42 @@ module ppe (interface in, interface out);
 
 	// Packet storage
     logic [ADDR_START:0] packet;
+    logic [ADDR_START:ADDR_END] dest_address;
     logic [OPCODE_START:OPCODE_END] opcode;
     logic signed [DATA_START - DATA_END:0] data;
+
     logic [4:0] OUTPUT_DIM = IFMAP_SIZE - FILTER_SIZE + 1;
+
 	// logic signed [`WEIGHT_WIDTH-1:0] weights_mem [`NUM_WEIGHTS:0]; // array of MAX_NUM_WEIGHTS 8-bit elements
-	logic signed [`NUM_INPUTS-1:0] inputs_mem; // array of MAX_NUM_INPUTS 1-bit elements
+	// logic signed [`NUM_INPUTS-1:0] inputs_mem; // array of MAX_NUM_INPUTS 1-bit elements
 	logic signed [`SUM_WIDTH:0] partial_sum = 0;
 
 	// Pointers
 	logic [$clog2(`NUM_WEIGHTS) - 1:0] wstore_ptr = 0;
-	logic [$clog2(`NUM_INPUTS) - 1:0] isum_ptr = 0;
-	
 	logic [$clog2(`NUM_WEIGHTS) - 1:0] w = 0;
+	logic [$clog2(`NUM_INPUTS) - 1:0] isum_ptr = 0;
 	logic [$clog2(`NUM_INPUTS) - 1:0] i = 0;
 
 	logic [1:0] ts = 1;
-
 	logic [3:0] dest_pe = 0;
-
 	logic [2:0] cnt_input_rows = 0; // counts num input rows received
 
 	logic input_data;
 	logic [`WEIGHT_WIDTH-1:0] weight;
 
-
-	Channel #(.hsProtocol(P4PhaseBD), .WIDTH(4)) w_cmd; 
+	Channel #(.hsProtocol(P4PhaseBD), .WIDTH(1)) w_cmd; 
 	Channel #(.hsProtocol(P4PhaseBD), .WIDTH(3)) w_waddr; 
 	Channel #(.hsProtocol(P4PhaseBD), .WIDTH(8)) w_wdata; 
 	Channel #(.hsProtocol(P4PhaseBD), .WIDTH(3)) w_raddr; 
-	Channel #(.hsProtocol(P4PhaseBD), .WIDTH(4)) w_rdata; 
+	Channel #(.hsProtocol(P4PhaseBD), .WIDTH(8)) w_rdata; 
 	weight_rf wrf(.command(w_cmd), .write_addr(w_waddr), .write_data(w_wdata), .read_addr(w_raddr), .read_data(w_rdata));
 	
 	
-	Channel #(.hsProtocol(P4PhaseBD), .WIDTH(4)) i_cmd; 
-	Channel #(.hsProtocol(P4PhaseBD), .WIDTH(3)) i_waddr; 
-	Channel #(.hsProtocol(P4PhaseBD), .WIDTH(8)) i_wdata; 
-	Channel #(.hsProtocol(P4PhaseBD), .WIDTH(3)) i_raddr; 
-	Channel #(.hsProtocol(P4PhaseBD), .WIDTH(4)) i_rdata; 
+	Channel #(.hsProtocol(P4PhaseBD), .WIDTH(1)) i_cmd; 
+	Channel #(.hsProtocol(P4PhaseBD), .WIDTH($clog2(`NUM_INPUTS))) i_waddr; 
+	Channel #(.hsProtocol(P4PhaseBD), .WIDTH(25)) i_wdata; 
+	Channel #(.hsProtocol(P4PhaseBD), .WIDTH($clog2(`NUM_INPUTS))) i_raddr; 
+	Channel #(.hsProtocol(P4PhaseBD), .WIDTH(1)) i_rdata; 
 	input_rf irf(.command(i_cmd), .write_addr(i_waddr), .write_data(i_wdata), .read_addr(i_raddr), .read_data(i_rdata));
 
 
@@ -218,8 +215,7 @@ module ppe (interface in, interface out);
 	depacketizer dptzr(.depacketizer_in(depacketizer_in), dest_address(dptzr_dest_address), .opcode(dptzr_opcode), .packet_data(dptzr_packet_data));
 
 	always begin
-
-		$display("*** %m %d",$time);	
+	
 		$display("Start receiving packet in module %m. Simulation time = %t", $time);
 		in.Receive(packet);
 		$display("Finished receiving packet in module %m. Simulation time = %t", $time);
@@ -228,8 +224,11 @@ module ppe (interface in, interface out);
 		
 		// Depacketize data
 		depacketizer_in.Send(packet);
-		dptzr_opcode.Receive(opcode);
-		dptzr_packet_data.Receive(data);
+		fork
+			dptzr_dest_address.Receive(dest_address);
+			dptzr_opcode.Receive(opcode);
+			dptzr_packet_data.Receive(data);
+		join
 
 		case(opcode) 
 			// Send weights to Weight Register File
@@ -260,9 +259,11 @@ module ppe (interface in, interface out);
 						partial_sum = 0;
 						for(w = 0, i = isum_ptr; w < FILTER_SIZE; w++, i++) begin
 							
+							i_cmd.Send(`READ_CMD);
 							i_raddr.Send(i); // Fetch inputs
 							i_rdata.Receive(input_data);
 
+							w_cmd.Send('READ_CMD);
 							w_raddr.Send(w); // Fetch weights
 							w_rdata.Receive(weight);
 
@@ -272,7 +273,7 @@ module ppe (interface in, interface out);
 						// Send data to Packetizer, then to SPE
 						ptzr_dest_address.Send(4'(dest_pe));
 						ptzr_opcode.Send(4'(0));
-						ptzr_packet_data.Send(25'(partial_sum))
+						ptzr_packet_data.Send(25'(partial_sum));
 						done.Send(1);
 						packetizer_out.Receive(packet);
 						
