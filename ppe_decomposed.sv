@@ -142,7 +142,7 @@ module depacketizer(interface depacketizer_in, interface dest_address, interface
 endmodule
 
 
-module ppe (interface in, interface out);
+module ppe_decomposed (interface in, interface out);
   	// Packet Format
   	// |   32 - 29    |    28 - 25   |   24 - 0 |
 	// | dest address |    opcode    |   data   |
@@ -236,7 +236,7 @@ module ppe (interface in, interface out);
 					$display("OP:RECV -- WEIGHTS");
 					for(int i = 0; i < 3; i+=1) begin
 						w_cmd.Send(`WRITE_CMD);
-						w_addr.Send(wstore_ptr + i);
+						w_waddr.Send(wstore_ptr + i);
 						w_wdata.Send(data[((i+1) * 8) - 1 : (i*8)]);
 					end
 					wstore_ptr += 3;

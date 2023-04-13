@@ -19,7 +19,7 @@ module ppe_tb;
 	//Interface Vector instatiation: 4-phase bundled data channel
 	Channel #(.hsProtocol(P4PhaseBD), .WIDTH(33)) intf  [1:0] (); 
 
-	ppe ppe_mod(.in(intf[0]), .out(intf[1]));
+	ppe_decomposed ppe_mod(.in(intf[0]), .out(intf[1]));
 
 	// Channel #(.hsProtocol(P4PhaseBD), .WIDTH(1)) start (); 
 	data_bucket #(.WIDTH(33)) db(intf[1]);
