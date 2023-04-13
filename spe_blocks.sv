@@ -8,11 +8,12 @@
 `define OP_PREVIOUS_POTENTIAL 2
 `define SUM_WIDTH 13
 `define OMEM_ID 12
-`define 
 
 import SystemVerilogCSP::*;
 
-module spe (interface in, interface out);
+module spe_functional_block (interface in, out, 
+	dptzr_opcode, dptzr_packet_data,
+ 	ptzr_dest_address, ptzr_opcode, ptzr_packet_data);
 
 	parameter ADDR_START = 32;
 	parameter ADDR_END = 29;
@@ -53,19 +54,26 @@ module spe (interface in, interface out);
 
 	always begin
 
-		$display("*** %m %d",$time);	
-		$display("Start receiving in module %m. Simulation time = %t", $time);
-		in.Receive(packet);
-		$display("Finished receiving in module %m. Simulation time = %t", $time);
+		$display("%m: Waiting to receive data from depacketizer");	
+		// $display("Start receiving in module %m. Simulation time = %t", $time);
+		// in.Receive(packet);
+		// $display("Finished receiving in module %m. Simulation time = %t", $time);
 
-		#FL; 
+		// #FL; 
+
+		// Receive depacketized data
+		fork
+			dptzr_opcode.Receive(opcode);
+			dptzr_packet_data.Receive(data);
+		join
+		#FL;
+		$display("Received data from depacketizer");
 
 		// Depacketize data
-		dest_address = packet[ADDR_START:ADDR_END];
-		opcode = packet[OPCODE_START:OPCODE_END];
-		data = packet[DATA_START:DATA_END];
+		// dest_address = packet[ADDR_START:ADDR_END];
+		// opcode = packet[OPCODE_START:OPCODE_END];
+		// data = packet[DATA_START:DATA_END];
 
-		// If a partial sum, aggregate the value
 		case(opcode)
 			`OP_PARTIAL_SUM: begin
 					$display("Received partial sum = %d", data);
@@ -83,21 +91,30 @@ module spe (interface in, interface out);
 						else begin
 							
 							// Send request for previous timestep's membrane potential
-							packet = 0;
-							packet[ADDR_START:ADDR_END] = 4'(`OMEM_ID);
-							packet[OPCODE_START:OPCODE_END] = 4'({3'(PE_ID), 1'(1)}); // request for previous membrane potential
-							packet[DATA_START:DATA_END] = 25'({3'(PE_ID), 1'(1)}); // dummy
+							// packet = 0;
+							// packet[ADDR_START:ADDR_END] = 4'(`OMEM_ID);
+							// packet[OPCODE_START:OPCODE_END] = 4'({3'(PE_ID), 1'(1)}); // request for previous membrane potential
+							// packet[DATA_START:DATA_END] = 25'({3'(PE_ID), 1'(1)}); // dummy
 
-							// Send the request
-							$display("Sending req for residual value");
-							out.Send(packet);
-							#FL;
-
-							// Receive the previous potential value
-							in.Receive(packet);
+							// Send request for previous timestep's membrane potential to Packetizer
+							$display("Sending req for residual value to packetizer");
+							ptzr_dest_address.Send(4'(`OMEM_ID));
+							ptzr_opcode.Send(4'({3'(PE_ID), 1'(1)}));
+							ptzr_packet_data.Send(25'({3'(PE_ID), 1'(1)}));
 							#BL;
 
-							prev_potential_val = packet[DATA_START:DATA_END];
+
+							// Send the request
+							// $display("Sending req for residual value");
+							// out.Send(packet);
+							// #FL;
+
+							// Receive the previous potential value from depacketizer
+							dptzr_opcode.Receive(opcode);
+							dptzr_packet_data.Receive(data);
+							#FL;
+
+							prev_potential_val = data;
 							$display("Received residual value = %d", prev_potential_val);
 						end
 
@@ -118,17 +135,25 @@ module spe (interface in, interface out);
 						end
 						
 						// Send new potential and spike to memory
-						packet = 0;
-						packet[ADDR_START:ADDR_END] = 4'(`OMEM_ID);
-						packet[OPCODE_START:OPCODE_END] = 4'({3'(PE_ID), 1'(0)}); // 1 appended to SPE ID
-						packet[13:0] = 25'({13'(new_potential), 1'(spike)}); // spike is LSB of data packet
+						// packet = 0;
+						// packet[ADDR_START:ADDR_END] = 4'(`OMEM_ID);
+						// packet[OPCODE_START:OPCODE_END] = 4'({3'(PE_ID), 1'(0)}); // 1 appended to SPE ID
+						// packet[13:0] = 25'({13'(new_potential), 1'(spike)}); // spike is LSB of data packet
 
 
-						$display("Start sending in module %m. Simulation time = %t", $time);
-						$display("Sending data = %d", data);
-						out.Send(packet);
-						$display("Finished sending in module %m. Simulation time = %t", $time);
+						// Send request for previous timestep's membrane potential to Packetizer
+						$display("Sending new potential and spike to packetizer to send to OMEM");
+						ptzr_dest_address.Send(4'(`OMEM_ID));
+						ptzr_opcode.Send(4'({3'(PE_ID), 1'(0)}));
+						ptzr_packet_data.Send(25'({13'(new_potential), 1'(spike)}));
 						#BL;
+
+
+						// $display("Start sending in module %m. Simulation time = %t", $time);
+						// $display("Sending data = %d", data);
+						// out.Send(packet);
+						// $display("Finished sending in module %m. Simulation time = %t", $time);
+						// #BL;
 						
 						ctr = 0; // reset ctr
 						sum = 0; // reset sum for next set of partial sums
