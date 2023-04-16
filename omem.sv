@@ -261,7 +261,7 @@ module omem (interface start_r, interface out_spike_data, interface out_spike_ad
             
             // Send output spikes to testbench
             else begin
-
+                $display("%m: Sending start_r, ts_r, layer_r signals")
                 start_r.Send(1);
                 ts_r.Send(1);
                 layer_r.Send(1);
@@ -270,6 +270,7 @@ module omem (interface start_r, interface out_spike_data, interface out_spike_ad
                 for(int i = 0; i < OUTPUT_SIZE * OUTPUT_SIZE; i++) begin
                     out_spike_addr.Send(i);
                     out_spike_data.Send(t1_spike_mem[i]);
+                    $display("Sending ts=1: spike=%d, addr=%d", i, t1_spike_mem[i]);
                     #FL;
                 end
 
@@ -280,6 +281,7 @@ module omem (interface start_r, interface out_spike_data, interface out_spike_ad
                 for(int i = 0; i < OUTPUT_SIZE * OUTPUT_SIZE; i++) begin
                     out_spike_addr.Send(i);
                     out_spike_data.Send(t2_spike_mem[i]);
+                    $display("Sending ts=2: spike=%d, addr=%d", i, t2_spike_mem[i]);
                     #FL;
                 end
 
