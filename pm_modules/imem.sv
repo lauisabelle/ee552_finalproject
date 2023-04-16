@@ -129,15 +129,17 @@ module imem (interface load_start, interface ifmap_addr, interface ifmap_data,
         router_in.Receive(packet);
         #BL;
         opcode = packet[OPCODE_START:OPCODE_END];
-        $display("opcode = %d", opcode);
+        $display("Received packet in IMEM. OPCODE = %d", opcode);
         // clear bits to prepare for sending
         packet = 0;
         
         case(opcode)
             `OP_WEIGHTS_DONE, `OP_TIMESTEP_DONE :  begin
                     if(opcode == `OP_TIMESTEP_DONE) begin
+                        $display("IMEM: Timestep 1 is done. Starting Timestep 2");
                         ts = 2;
                     end
+                    $display("IMEM: Start sending inputs to PPE Modules");
                     // Send 1 row of data (25 inputs) to each of the PE modules
                     for(int i = 0; i < 5; i++) begin
                         packet[ADDR_START:ADDR_END] = 4'(i+5);
@@ -149,6 +151,7 @@ module imem (interface load_start, interface ifmap_addr, interface ifmap_data,
 			                packet[DATA_START:DATA_END] = 25'(t2_mem[((i+1) * IFMAP_SIZE) - 1 -: IFMAP_SIZE]);
                         end
                         router_out.Send(packet);
+                        $display("IMEM: Sent 25 inputs to PPE %d", i+5);
                         #FL;
                     end
 
@@ -161,6 +164,7 @@ module imem (interface load_start, interface ifmap_addr, interface ifmap_data,
             end
             
             `OP_PPE_5_REQ_INPUT : begin
+                    $display("IMEM: PPE 5 Requesting Inputs");
                     packet[ADDR_START:ADDR_END] = 4'(`OP_PPE_5_REQ_INPUT); // SEND BACK TO WHERE IT CAME FROM
                     packet[OPCODE_START:OPCODE_END] = 4'(`OP_PPE_INPUT); 
                     $display("ptr = %d", pe5_ptr);
@@ -173,12 +177,14 @@ module imem (interface load_start, interface ifmap_addr, interface ifmap_data,
                         packet[DATA_START:DATA_END] = 25'(t2_mem[(pe5_ptr + 24) -: IFMAP_SIZE]);
                     end
                     router_out.Send(packet);
+                    $display("IMEM: Sent more inputs to PPE 5");
                     #FL;
 
                     pe5_ptr += 5 * IFMAP_SIZE; // prepare for next set
             end
 
             `OP_PPE_6_REQ_INPUT : begin
+                    $display("IMEM: PPE 6 Requesting Inputs");
                     packet[ADDR_START:ADDR_END] = 4'(`OP_PPE_6_REQ_INPUT);
                     packet[OPCODE_START:OPCODE_END] = 4'(`OP_PPE_INPUT); 
                     $display("ptr = %d", pe6_ptr);
@@ -191,12 +197,14 @@ module imem (interface load_start, interface ifmap_addr, interface ifmap_data,
 			            packet[DATA_START:DATA_END] = 25'(t2_mem[(pe6_ptr + 24) -: IFMAP_SIZE]);
                     end
                     router_out.Send(packet);
+                    $display("IMEM: Sent more inputs to PPE 6");
                     #FL;
 
                     pe6_ptr += 5 * IFMAP_SIZE; // prepare for next set
             end
 
             `OP_PPE_7_REQ_INPUT : begin
+                    $display("IMEM: PPE 7 Requesting Inputs");
                     packet[ADDR_START:ADDR_END] = 4'(`OP_PPE_7_REQ_INPUT);
                     packet[OPCODE_START:OPCODE_END] = 4'(`OP_PPE_INPUT); 
                     $display("ptr = %d", pe7_ptr);
@@ -209,12 +217,14 @@ module imem (interface load_start, interface ifmap_addr, interface ifmap_data,
 			            packet[DATA_START:DATA_END] = 25'(t2_mem[(pe7_ptr + 24) -: IFMAP_SIZE]);
                     end
                     router_out.Send(packet);
+                    $display("IMEM: Sent more inputs to PPE 7");
                     #FL;
 
                     pe7_ptr += 5 * IFMAP_SIZE; // prepare for next set
             end
 
             `OP_PPE_8_REQ_INPUT : begin
+                    $display("IMEM: PPE 8 Requesting Inputs");
                     packet[ADDR_START:ADDR_END] = 4'(`OP_PPE_8_REQ_INPUT);
                     packet[OPCODE_START:OPCODE_END] = 4'(`OP_PPE_INPUT); 
                     $display("ptr = %d", pe8_ptr);
@@ -227,12 +237,14 @@ module imem (interface load_start, interface ifmap_addr, interface ifmap_data,
                         packet[DATA_START:DATA_END] = 25'(t2_mem[(pe8_ptr + 24) -: IFMAP_SIZE]);
                     end
                     router_out.Send(packet);
+                    $display("IMEM: Sent more inputs to PPE 8");
                     #FL;
 
                     pe8_ptr += 5 * IFMAP_SIZE; // prepare for next set
             end
 
             `OP_PPE_9_REQ_INPUT : begin
+                    $display("IMEM: PPE 9 Requesting Inputs");
                     packet[ADDR_START:ADDR_END] = 4'(`OP_PPE_9_REQ_INPUT);
                     packet[OPCODE_START:OPCODE_END] = 4'(`OP_PPE_INPUT); 
                     $display("ptr = %d", pe9_ptr);
@@ -245,6 +257,7 @@ module imem (interface load_start, interface ifmap_addr, interface ifmap_data,
 			            packet[DATA_START:DATA_END] = 25'(t2_mem[(pe9_ptr + 24) -: IFMAP_SIZE]);
                     end
                     router_out.Send(packet);
+                    $display("IMEM: Sent more inputs to PPE 9");
                     #FL;
 
                     pe9_ptr += 5 * IFMAP_SIZE; // prepare for next set

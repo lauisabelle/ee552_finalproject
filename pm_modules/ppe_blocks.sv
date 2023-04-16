@@ -12,7 +12,7 @@
 `define SUM_WIDTH 13
 `define NUM_WEIGHTS 5 // local storage upper bound
 `define NUM_INPUTS 25
-`define IMEM_ID 10
+`define IMEM_ID 11
 
 `define WRITE_CMD 0
 `define READ_CMD  1

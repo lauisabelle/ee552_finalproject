@@ -261,7 +261,7 @@ module noc_pe_mem_snn(interface ifmap_data, ifmap_addr, timestep, filter_data, f
     Channel #(.hsProtocol(P2PhaseBD), .WIDTH(WIDTH_PACKAGE)) ch_omem  [1:0] ();
 
 	// SPE channels
-	Channel #(.hsProtocol(P4PhaseBD), .WIDTH(35)) ch_spe  [9:0] (); 
+	Channel #(.hsProtocol(P4PhaseBD), .WIDTH(33)) ch_spe  [9:0] (); 
 
 	// PPE channels
 	Channel #(.hsProtocol(P4PhaseBD), .WIDTH(33)) ch_ppe  [9:0] (); 
