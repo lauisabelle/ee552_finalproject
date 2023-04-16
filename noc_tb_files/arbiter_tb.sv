@@ -68,54 +68,54 @@ module data_bucket (interface r);
 
 endmodule
 
-module arbiter_2channel (interface i0, interface i1, interface winner);
-    parameter WIDTH_PACKAGE = 33;
-    parameter FL = 2;
-    parameter BL = 1;
+// module arbiter_2channel (interface i0, interface i1, interface winner);
+//     parameter WIDTH_PACKAGE = 33;
+//     parameter FL = 2;
+//     parameter BL = 1;
     
-    logic [WIDTH_PACKAGE-1:0] data_i0;
-    logic [WIDTH_PACKAGE-1:0] data_i1;
-    logic winner_id;
+//     logic [WIDTH_PACKAGE-1:0] data_i0;
+//     logic [WIDTH_PACKAGE-1:0] data_i1;
+//     logic winner_id;
 
-    // We give channle i0 the priority at the beginning
-    initial winner_id = 0;
+//     // We give channle i0 the priority at the beginning
+//     initial winner_id = 0;
 
-    always begin
-        /* For reference: (from svcsp.sv)
-        typedef enum {idle, r_pend, s_pend, s12m_pend} ChannleStatus;
-        */
-        // Wait until either or both channels are pending to send
-        wait(i0.status == 2 || i1.status == 2);
-        // If both channels have something to send
-        if (i0.status == 2 && i1.status == 2) begin
-            winner_id = ~ winner_id;
-            if (winner_id == 0) begin
-                i0.Receive(data_i0);
-                $display("channel 0 won the arbitration.");
-                // winner = 1;
-            end
-            else begin
-                i1.Receive(data_i1);
-                $display("channel 1 won the arbitration.");
-                // winner = 0;
-            end
-        end
-        // If channel i0 has data to send
-        else if (i0.status == 2) begin
-            i0.Receive(data_i0);
-            winner_id = 0;
-            $display("channel 0 won the arbitration.");
-        end
-        else if (i1.status == 2) begin
-            i1.Receive(data_i1);
-            winner_id = 1;
-            $display("channel 1 won the arbitration.");
-        end
-        #FL;
-        winner.Send(winner_id);
-        #BL;
-    end
-endmodule
+//     always begin
+//         /* For reference: (from svcsp.sv)
+//         typedef enum {idle, r_pend, s_pend, s12m_pend} ChannleStatus;
+//         */
+//         // Wait until either or both channels are pending to send
+//         wait(i0.status == 2 || i1.status == 2);
+//         // If both channels have something to send
+//         if (i0.status == 2 && i1.status == 2) begin
+//             winner_id = ~ winner_id;
+//             if (winner_id == 0) begin
+//                 i0.Receive(data_i0);
+//                 $display("channel 0 won the arbitration.");
+//                 // winner = 1;
+//             end
+//             else begin
+//                 i1.Receive(data_i1);
+//                 $display("channel 1 won the arbitration.");
+//                 // winner = 0;
+//             end
+//         end
+//         // If channel i0 has data to send
+//         else if (i0.status == 2) begin
+//             i0.Receive(data_i0);
+//             winner_id = 0;
+//             $display("channel 0 won the arbitration.");
+//         end
+//         else if (i1.status == 2) begin
+//             i1.Receive(data_i1);
+//             winner_id = 1;
+//             $display("channel 1 won the arbitration.");
+//         end
+//         #FL;
+//         winner.Send(winner_id);
+//         #BL;
+//     end
+// endmodule
 
 
 module arbiter_tb;
