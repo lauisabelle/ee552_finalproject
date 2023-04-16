@@ -249,6 +249,7 @@ module noc_pe_mem_snn(interface ifmap_data, ifmap_addr, timestep, filter_data, f
 			load_done, ts_r, layer_r, done_r,
 			out_spike_addr, out_spike_data,
 			load_start, start_r);
+    parameter WIDTH_PACKAGE = 33;
 
     // WMEM channels
     Channel #(.hsProtocol(P2PhaseBD), .WIDTH(WIDTH_PACKAGE)) ch_wmem  [1:0] ();
@@ -274,22 +275,21 @@ module noc_pe_mem_snn(interface ifmap_data, ifmap_addr, timestep, filter_data, f
 	omem #(.PE_ID(12)) omem_mod(.start_r(start_r), .out_spike_data(out_spike_data), .out_spike_addr(out_spike_addr), 
         .ts_r(ts_r), .layer_r(layer_r), .done_r(done_r), .router_in(ch_omem[0]), .router_out(ch_omem[1]));
 
-	spe #(.PE_ID(0)) spe_mod(.spe_in(ch_spe[0]), .spe_out(ch_spe[1]));
-	spe #(.PE_ID(1)) spe_mod(.spe_in(ch_spe[2]), .spe_out(ch_spe[3]));
-	spe #(.PE_ID(2)) spe_mod(.spe_in(ch_spe[4]), .spe_out(ch_spe[5]));
-	spe #(.PE_ID(3)) spe_mod(.spe_in(ch_spe[6]), .spe_out(ch_spe[7]));
-	spe #(.PE_ID(4)) spe_mod(.spe_in(ch_spe[8]), .spe_out(ch_spe[9]));
+	spe #(.PE_ID(0)) spe_mod0(.spe_in(ch_spe[0]), .spe_out(ch_spe[1]));
+	spe #(.PE_ID(1)) spe_mod1(.spe_in(ch_spe[2]), .spe_out(ch_spe[3]));
+	spe #(.PE_ID(2)) spe_mod2(.spe_in(ch_spe[4]), .spe_out(ch_spe[5]));
+	spe #(.PE_ID(3)) spe_mod3(.spe_in(ch_spe[6]), .spe_out(ch_spe[7]));
+	spe #(.PE_ID(4)) spe_mod4(.spe_in(ch_spe[8]), .spe_out(ch_spe[9]));
 
-	ppe #(.PE_ID(5)) ppe_mod(.ppe_in(ch_ppe[0]), .ppe_out(ch_ppe[1]));
-	ppe #(.PE_ID(6)) ppe_mod(.ppe_in(ch_ppe[2]), .ppe_out(ch_ppe[3]));
-	ppe #(.PE_ID(7)) ppe_mod(.ppe_in(ch_ppe[4]), .ppe_out(ch_ppe[5]));
-	ppe #(.PE_ID(8)) ppe_mod(.ppe_in(ch_ppe[6]), .ppe_out(ch_ppe[7]));
-	ppe #(.PE_ID(9)) ppe_mod(.ppe_in(ch_ppe[8]), .ppe_out(ch_ppe[9]));
+	ppe #(.PE_ID(5)) ppe_mod5(.ppe_in(ch_ppe[0]), .ppe_out(ch_ppe[1]));
+	ppe #(.PE_ID(6)) ppe_mod6(.ppe_in(ch_ppe[2]), .ppe_out(ch_ppe[3]));
+	ppe #(.PE_ID(7)) ppe_mod7(.ppe_in(ch_ppe[4]), .ppe_out(ch_ppe[5]));
+	ppe #(.PE_ID(8)) ppe_mod8(.ppe_in(ch_ppe[6]), .ppe_out(ch_ppe[7]));
+	ppe #(.PE_ID(9)) ppe_mod9(.ppe_in(ch_ppe[8]), .ppe_out(ch_ppe[9]));
 
     // pm0_in = incoming channel into router = outgoing channel out of PE
 	router_network rn(.pm0_in(ch_spe[1]), .pm0_out(ch_spe[0]), .pm1_in(ch_spe[3]), .pm1_out(ch_spe[2]), .pm2_in(ch_spe[5]), .pm2_out(ch_spe[4]), .pm3_in(ch_spe[7]), .pm3_out(ch_spe[6]), .pm4_in(ch_spe[9]), .pm4_out(ch_spe[8]),
-    	.pm5_in(ch_ppe[1]), .pm5_out(ch_ppe[0]), .pm6_in(ch_ppe[3]), .pm6_out(ch_ppe[2]), .pm7_in(ch_ppe[5]), .pm7_out(ch_ppe[4]), .pm8_in(ch_ppe[7]), .pm8_out()ch_ppe[6], .pm9_in(ch_ppe[9]), .pm9_out(ch_ppe[8]),
+    	.pm5_in(ch_ppe[1]), .pm5_out(ch_ppe[0]), .pm6_in(ch_ppe[3]), .pm6_out(ch_ppe[2]), .pm7_in(ch_ppe[5]), .pm7_out(ch_ppe[4]), .pm8_in(ch_ppe[7]), .pm8_out(ch_ppe[6]), .pm9_in(ch_ppe[9]), .pm9_out(ch_ppe[8]),
         .pm10_in(ch_wmem[1]), .pm10_out(ch_wmem[0]), .pm11_in(ch_imem[1]), .pm11_out(ch_imem[0]), .pm12_in(ch_omem[1]), .pm12_out(ch_omem[0]));
 endmodule
  
-

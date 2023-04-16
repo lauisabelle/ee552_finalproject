@@ -261,7 +261,7 @@ module omem (interface start_r, interface out_spike_data, interface out_spike_ad
             
             // Send output spikes to testbench
             else begin
-                $display("%m: Sending start_r, ts_r, layer_r signals")
+                $display("%m: Sending start_r, ts_r, layer_r signals");
                 start_r.Send(1);
                 ts_r.Send(1);
                 layer_r.Send(1);
