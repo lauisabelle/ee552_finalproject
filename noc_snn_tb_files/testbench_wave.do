@@ -95,3 +95,7 @@ configure wave -timelineunits ns
 
 
 
+
+
+
+sim:/testbench/dut/ppe_mod5/wrf/weights_mem sim:/testbench/dut/ppe_mod5/irf/inputs_mem sim:/testbench/dut/ppe_mod6/wrf/weights_mem sim:/testbench/dut/ppe_mod6/irf/inputs_mem sim:/testbench/dut/ppe_mod7/wrf/weights_mem sim:/testbench/dut/ppe_mod7/irf/inputs_mem sim:/testbench/dut/ppe_mod8/wrf/weights_mem sim:/testbench/dut/ppe_mod8/irf/inputs_mem sim:/testbench/dut/ppe_mod9/wrf/weights_mem sim:/testbench/dut/ppe_mod9/irf/inputs_mem 

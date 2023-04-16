@@ -261,10 +261,10 @@ module noc_pe_mem_snn(interface ifmap_data, ifmap_addr, timestep, filter_data, f
     Channel #(.hsProtocol(P2PhaseBD), .WIDTH(WIDTH_PACKAGE)) ch_omem  [1:0] ();
 
 	// SPE channels
-	Channel #(.hsProtocol(P4PhaseBD), .WIDTH(33)) ch_spe  [9:0] (); 
+	Channel #(.hsProtocol(P4PhaseBD), .WIDTH(WIDTH_PACKAGE)) ch_spe  [9:0] (); 
 
 	// PPE channels
-	Channel #(.hsProtocol(P4PhaseBD), .WIDTH(33)) ch_ppe  [9:0] (); 
+	Channel #(.hsProtocol(P4PhaseBD), .WIDTH(WIDTH_PACKAGE)) ch_ppe  [9:0] (); 
 
 	wmem #(.PE_ID(10)) wmem_mod( .load_start(load_start), .filter_addr(filter_addr), .filter_data(filter_data),
             .load_done(load_done), .router_in(ch_wmem[0]), .router_out(ch_wmem[1]));
@@ -292,4 +292,3 @@ module noc_pe_mem_snn(interface ifmap_data, ifmap_addr, timestep, filter_data, f
     	.pm5_in(ch_ppe[1]), .pm5_out(ch_ppe[0]), .pm6_in(ch_ppe[3]), .pm6_out(ch_ppe[2]), .pm7_in(ch_ppe[5]), .pm7_out(ch_ppe[4]), .pm8_in(ch_ppe[7]), .pm8_out(ch_ppe[6]), .pm9_in(ch_ppe[9]), .pm9_out(ch_ppe[8]),
         .pm10_in(ch_wmem[1]), .pm10_out(ch_wmem[0]), .pm11_in(ch_imem[1]), .pm11_out(ch_imem[0]), .pm12_in(ch_omem[1]), .pm12_out(ch_omem[0]));
 endmodule
- 
