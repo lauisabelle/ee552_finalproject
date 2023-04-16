@@ -112,7 +112,7 @@ module spe_functional_block (interface dptzr_opcode, dptzr_packet_data,
 							spike = 0;
 						end
 						
-						// Send request for previous timestep's membrane potential to Packetizer
+						// Send new membrane potential to Packetizer
 						$display("Sending new potential and spike to packetizer to send to OMEM");
 						ptzr_dest_address.Send(4'(`OMEM_ID));
 						ptzr_opcode.Send(4'({3'(PE_ID), 1'(0)}));

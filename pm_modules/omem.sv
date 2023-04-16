@@ -89,11 +89,11 @@ module omem (interface start_r, interface out_spike_data, interface out_spike_ad
         if(opcode % 2 == 0) begin
             new_potential = data[DATA_START:DATA_END+1];
             spike = data[DATA_END]; // spike is LSB
-		    $display("Received store request, data = %b", data);
+		    $display("Received store request from spe_id=%d, data = %d", packet[OPCODE_START:OPCODE_END+1], data);
         end
         else begin
             spe_id = packet[OPCODE_START:OPCODE_END+1];
-		    $display("Received send request from spe_id= %b", spe_id);
+		    $display("Received send request from spe_id= %d", spe_id);
         end
 
         #BL;
@@ -101,6 +101,7 @@ module omem (interface start_r, interface out_spike_data, interface out_spike_ad
 
         case(opcode)
             `OP_SPE_0_SEND_DATA :  begin
+                    $display("From SPE 0");
                     if(ts == 1) begin
                         $display("ts1: spike = %d", spike);
                         $display("ts1: new_potential = %d", new_potential);
@@ -118,6 +119,7 @@ module omem (interface start_r, interface out_spike_data, interface out_spike_ad
                     pe0_ptr += 5;
             end
             `OP_SPE_1_SEND_DATA :  begin
+                    $display("From SPE 1");
                     if(ts == 1) begin
                         $display("ts1: spike = %d", spike);
                         $display("ts1: new_potential = %d", new_potential);
@@ -135,6 +137,7 @@ module omem (interface start_r, interface out_spike_data, interface out_spike_ad
                     pe1_ptr += 5;
             end
             `OP_SPE_2_SEND_DATA :  begin
+                    $display("From SPE 2");
                     if(ts == 1) begin
                         $display("ts1: spike = %d", spike);
                         $display("ts1: new_potential = %d", new_potential);
@@ -152,6 +155,7 @@ module omem (interface start_r, interface out_spike_data, interface out_spike_ad
                     pe2_ptr += 5;
             end
             `OP_SPE_3_SEND_DATA :  begin
+                    $display("From SPE 3");
                     if(ts == 1) begin
                         $display("ts1: spike = %d", spike);
                         $display("ts1: new_potential = %d", new_potential);
@@ -169,6 +173,7 @@ module omem (interface start_r, interface out_spike_data, interface out_spike_ad
                     pe3_ptr += 5;
             end
             `OP_SPE_4_SEND_DATA :  begin
+                    $display("From SPE 4");
                     if(ts == 1) begin
                         $display("ts1: spike = %d", spike);
                         $display("ts1: new_potential = %d", new_potential);
@@ -187,6 +192,7 @@ module omem (interface start_r, interface out_spike_data, interface out_spike_ad
             end
 
             `OP_SPE_0_REQ_DATA :  begin
+                    $display("From SPE 0");
                     packet[ADDR_START:ADDR_END] = 4'(spe_id); // respond to sender of request packet
                     packet[OPCODE_START:OPCODE_END] = 4'(spe_id); // irrelevant
                     packet[DATA_START:DATA_END] = 25'(t1_residue_mem[pe0_ptr]); // only t1 is used for requested residual data
@@ -196,6 +202,7 @@ module omem (interface start_r, interface out_spike_data, interface out_spike_ad
                     #FL;  
             end
             `OP_SPE_1_REQ_DATA :  begin
+                    $display("From SPE 1");
                     packet[ADDR_START:ADDR_END] = 4'(spe_id); // respond to sender of request packet
                     packet[OPCODE_START:OPCODE_END] = 4'(spe_id); // irrelevant
                     packet[DATA_START:DATA_END] = 25'(t1_residue_mem[pe1_ptr]); // only t1 is used for requested residual data
@@ -205,6 +212,7 @@ module omem (interface start_r, interface out_spike_data, interface out_spike_ad
                     #FL;  
             end
             `OP_SPE_2_REQ_DATA :  begin
+                    $display("From SPE 2");
                     packet[ADDR_START:ADDR_END] = 4'(spe_id); // respond to sender of request packet
                     packet[OPCODE_START:OPCODE_END] = 4'(spe_id); // irrelevant
                     packet[DATA_START:DATA_END] = 25'(t1_residue_mem[pe2_ptr]); // only t1 is used for requested residual data
@@ -214,6 +222,7 @@ module omem (interface start_r, interface out_spike_data, interface out_spike_ad
                     #FL;  
             end
             `OP_SPE_3_REQ_DATA :  begin
+                    $display("From SPE 3");
                     packet[ADDR_START:ADDR_END] = 4'(spe_id); // respond to sender of request packet
                     packet[OPCODE_START:OPCODE_END] = 4'(spe_id); // irrelevant
                     packet[DATA_START:DATA_END] = 25'(t1_residue_mem[pe3_ptr]); // only t1 is used for requested residual data
@@ -223,6 +232,7 @@ module omem (interface start_r, interface out_spike_data, interface out_spike_ad
                     #FL;  
             end
             `OP_SPE_4_REQ_DATA :  begin
+                    $display("From SPE 4");
                     packet[ADDR_START:ADDR_END] = 4'(spe_id); // respond to sender of request packet
                     packet[OPCODE_START:OPCODE_END] = 4'(spe_id); // irrelevant
                     packet[DATA_START:DATA_END] = 25'(t1_residue_mem[pe4_ptr]); // only t1 is used for requested residual data

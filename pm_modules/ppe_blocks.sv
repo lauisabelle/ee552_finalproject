@@ -130,7 +130,7 @@ module ppe_functional_block(interface w_cmd, w_waddr, w_wdata, w_raddr, w_rdata,
 
 	logic [1:0] ts = 1;
 	logic [3:0] dest_pe = 0;
-	logic [2:0] cnt_input_rows = 0; // counts num input rows received
+	// logic [2:0] cnt_input_rows = 0; // counts num input rows received
 
 	logic input_data;
 	logic [`WEIGHT_WIDTH-1:0] weight;
@@ -165,7 +165,7 @@ module ppe_functional_block(interface w_cmd, w_waddr, w_wdata, w_raddr, w_rdata,
 					$display("OP:RECV -- INPUTS");
 					
 					isum_ptr = 0; // Prepare to process the next set of inputs					
-					cnt_input_rows += 1; // Increase count
+					// cnt_input_rows += 1; // Increase count
 
 					// Send inputs to Input Register File
 					i_cmd.Send(`WRITE_CMD);
@@ -193,10 +193,11 @@ module ppe_functional_block(interface w_cmd, w_waddr, w_wdata, w_raddr, w_rdata,
 							w_rdata.Receive(weight);
 							#FL;
 
+							$display("%d + (%d * %d)", partial_sum, input_data, weight);
 							partial_sum += (input_data * weight);
 						end
 
-						$display("Sending partial sum to packetizer. This is ts=%d, req=%d", ts, cnt_input_rows);
+						$display("PPE %d: Sending partial sum=%d to packetizer. This is ts=%d", PE_ID, partial_sum, ts);
 					
 						// Send data to Packetizer, which will be forwarded to SPE
 						ptzr_dest_address.Send(4'(dest_pe));
@@ -206,30 +207,30 @@ module ppe_functional_block(interface w_cmd, w_waddr, w_wdata, w_raddr, w_rdata,
 
 						dest_pe = (dest_pe + 1) % FILTER_SIZE; // cycle through all of the SPE's 0 - 4
 
-						// Prepare to read the next set of data
-						if(isum_ptr + 1 % OUTPUT_DIM == 0) begin
-							isum_ptr = i + FILTER_SIZE; // move to the next "row" of inputs
-						end
-						else begin
-							isum_ptr = isum_ptr + 1; // slide the window of inputs by 1
-						end
+						// // Prepare to read the next set of data
+						// if(isum_ptr + 1 % OUTPUT_DIM == 0) begin
+						// 	isum_ptr = i + FILTER_SIZE; // move to the next "row" of inputs
+						// end
+						// else begin
+						isum_ptr = isum_ptr + 1; // slide the window of inputs by 1
+						// end
 					end
 
-					if(cnt_input_rows < 5) begin
-						$display("Requesting more inputs from IMEM. This is ts=%d, req=%d", ts, cnt_input_rows);
-						
-						// Request more inputs from I_MEM
-						ptzr_dest_address.Send(4'(`IMEM_ID));
-						ptzr_opcode.Send(4'(PE_ID));
-						ptzr_packet_data.Send(25'(0)); // irrelevant
-						#BL;
+					// if(cnt_input_rows < 5) begin
+					$display("Requesting more inputs from IMEM. This is ts=%d", ts);
+					
+					// Request more inputs from I_MEM
+					ptzr_dest_address.Send(4'(`IMEM_ID));
+					ptzr_opcode.Send(4'(PE_ID));
+					ptzr_packet_data.Send(25'(0)); // irrelevant
+					#BL;
 
-					end 
+					// end 
 			end
 			`OP_TIMESTEP_DONE: begin
 				$display("OP:RECV -- TIMESTEP DONE");
 				ts = 2;
-				cnt_input_rows = 0; // reset
+				// cnt_input_rows = 0; // reset
 			end
 		endcase
 	end

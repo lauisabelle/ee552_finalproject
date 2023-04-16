@@ -72,6 +72,18 @@ add wave -noupdate {/testbench/dut/ch_ppe[8]/data}
 add wave -noupdate {/testbench/dut/ch_ppe[9]/data} 
 
 
+add wave -radix unsigned -noupdate {/testbench/dut/ppe_mod5/wrf/weights_mem }
+add wave -radix binary -noupdate {/testbench/dut/ppe_mod5/irf/inputs_mem }
+add wave -radix unsigned -noupdate {/testbench/dut/ppe_mod6/wrf/weights_mem }
+add wave -radix binary -noupdate {/testbench/dut/ppe_mod6/irf/inputs_mem }
+add wave -radix unsigned -noupdate {/testbench/dut/ppe_mod7/wrf/weights_mem }
+add wave -radix binary -noupdate {/testbench/dut/ppe_mod7/irf/inputs_mem }
+add wave -radix unsigned -noupdate {/testbench/dut/ppe_mod8/wrf/weights_mem }
+add wave -radix binary -noupdate {/testbench/dut/ppe_mod8/irf/inputs_mem }
+add wave -radix unsigned -noupdate {/testbench/dut/ppe_mod9/wrf/weights_mem }
+add wave -radix binary -noupdate {/testbench/dut/ppe_mod9/irf/inputs_mem }
+
+
 
 
 TreeUpdate [SetDefaultTree]
@@ -98,4 +110,13 @@ configure wave -timelineunits ns
 
 
 
-sim:/testbench/dut/ppe_mod5/wrf/weights_mem sim:/testbench/dut/ppe_mod5/irf/inputs_mem sim:/testbench/dut/ppe_mod6/wrf/weights_mem sim:/testbench/dut/ppe_mod6/irf/inputs_mem sim:/testbench/dut/ppe_mod7/wrf/weights_mem sim:/testbench/dut/ppe_mod7/irf/inputs_mem sim:/testbench/dut/ppe_mod8/wrf/weights_mem sim:/testbench/dut/ppe_mod8/irf/inputs_mem sim:/testbench/dut/ppe_mod9/wrf/weights_mem sim:/testbench/dut/ppe_mod9/irf/inputs_mem 
+/testbench/dut/ppe_mod5/wrf/weights_mem 
+/testbench/dut/ppe_mod5/irf/inputs_mem 
+/testbench/dut/ppe_mod6/wrf/weights_mem 
+/testbench/dut/ppe_mod6/irf/inputs_mem 
+/testbench/dut/ppe_mod7/wrf/weights_mem 
+/testbench/dut/ppe_mod7/irf/inputs_mem 
+/testbench/dut/ppe_mod8/wrf/weights_mem 
+/testbench/dut/ppe_mod8/irf/inputs_mem 
+/testbench/dut/ppe_mod9/wrf/weights_mem 
+/testbench/dut/ppe_mod9/irf/inputs_mem 
