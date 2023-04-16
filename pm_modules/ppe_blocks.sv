@@ -142,6 +142,7 @@ module ppe_functional_block(interface w_cmd, w_waddr, w_wdata, w_raddr, w_rdata,
 
 		// Receive depacketized data
 		fork
+			// dptzr_dest_address.Receive(dest_address);
 			dptzr_opcode.Receive(opcode);
 			dptzr_packet_data.Receive(data);
 		join
@@ -167,7 +168,6 @@ module ppe_functional_block(interface w_cmd, w_waddr, w_wdata, w_raddr, w_rdata,
 					
 					isum_ptr = 0; // Prepare to process the next set of inputs	
 					cnt += 1;				
-					// cnt_input_rows += 1; // Increase count
 
 					// Send inputs to Input Register File
 					i_cmd.Send(`WRITE_CMD);
@@ -199,40 +199,27 @@ module ppe_functional_block(interface w_cmd, w_waddr, w_wdata, w_raddr, w_rdata,
 							partial_sum += (input_data * weight);
 						end
 
+						// Send data to Packetizer, which will be forwarded to SPE
 						$display("PPE %d: Sending partial sum=%d to packetizer. This is ts=%d", PE_ID, partial_sum, ts);
+						ptzr_dest_address.Send(4'(dest_pe));
+						ptzr_opcode.Send(4'(PE_ID));
+						ptzr_packet_data.Send(25'(partial_sum));
+						#BL;
 
-						// only request if there is more data left in the timestep
-						if(cnt != 441) begin
-							// Send data to Packetizer, which will be forwarded to SPE
-							ptzr_dest_address.Send(4'(dest_pe));
-							ptzr_opcode.Send(4'(0));
-							ptzr_packet_data.Send(25'(partial_sum));
-							#BL;
-							
-						end
-						
 						dest_pe = (dest_pe + 1) % FILTER_SIZE; // cycle through all of the SPE's 0 - 4
-						
-
-						// // Prepare to read the next set of data
-						// if(isum_ptr + 1 % OUTPUT_DIM == 0) begin
-						// 	isum_ptr = i + FILTER_SIZE; // move to the next "row" of inputs
-						// end
-						// else begin
 						isum_ptr = isum_ptr + 1; // slide the window of inputs by 1
-						// end
+					
 					end
 
-					// if(cnt_input_rows < 5) begin
-					$display("Requesting more inputs from IMEM. This is ts=%d", ts);
-					
-					// Request more inputs from I_MEM
-					ptzr_dest_address.Send(4'(`IMEM_ID));
-					ptzr_opcode.Send(4'(PE_ID));
-					ptzr_packet_data.Send(25'(0)); // irrelevant
-					#BL;
+					// Request more inputs if we haven't received 21 rows yet
+					if(cnt < OUTPUT_DIM) begin
+						$display("Requesting more inputs from IMEM. This is ts=%d", ts);
+						ptzr_dest_address.Send(4'(`IMEM_ID));
+						ptzr_opcode.Send(4'(PE_ID));
+						ptzr_packet_data.Send(25'(0)); // irrelevant
+						#BL;
+					end
 
-					// end 
 			end
 			`OP_TIMESTEP_DONE: begin
 				$display("OP:RECV -- TIMESTEP DONE");

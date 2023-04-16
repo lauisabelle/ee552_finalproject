@@ -3,7 +3,11 @@
 // Defines the Sum PE module which aggregates partial sums
 
 `timescale 1ns/1ns
-`define OP_PARTIAL_SUM 0
+`define OP_PARTIAL_SUM_PPE5 5
+`define OP_PARTIAL_SUM_PPE6 6
+`define OP_PARTIAL_SUM_PPE7 7
+`define OP_PARTIAL_SUM_PPE8 8
+`define OP_PARTIAL_SUM_PPE9 9
 `define OP_FIRST_TIMESTEP_DONE 15
 `define OP_PREVIOUS_POTENTIAL 2
 `define SUM_WIDTH 13
@@ -11,8 +15,8 @@
 
 import SystemVerilogCSP::*;
 
-module spe_functional_block (interface dptzr_opcode, dptzr_packet_data,
- 		ptzr_dest_address, ptzr_opcode, ptzr_packet_data);
+module spe_functional_block (interface dptzr_dest_address, dptzr_opcode, dptzr_packet_data,
+ 		ptzr_opcode, ptzr_packet_data);
 
 	parameter ADDR_START = 32;
 	parameter ADDR_END = 29;
@@ -40,6 +44,8 @@ module spe_functional_block (interface dptzr_opcode, dptzr_packet_data,
 	logic [DATA_START - DATA_END:0] prev_potential_val;
 
 	logic [4:0] OUTPUT_DIM = IFMAP_SIZE - FILTER_SIZE + 1;
+
+	logic [13:0] temp_vals [6:0];
 	
 	logic [DATA_START - DATA_END:0] sum = 0;
 
@@ -51,12 +57,16 @@ module spe_functional_block (interface dptzr_opcode, dptzr_packet_data,
 	logic spike;
 	logic [`SUM_WIDTH-1:0] new_potential;
 
+
+	logic [`SUM_WIDTH-1:0] partial_sums [24:0]; // STORES MAX 5 PARTIAL SUMS PER PPE
+
 	always begin
 
 		$display("%m: Waiting to receive data from depacketizer");	
 
 		// Receive depacketized data
 		fork
+			// dptzr_dest_address.Receive(dest_address);
 			dptzr_opcode.Receive(opcode);
 			dptzr_packet_data.Receive(data);
 		join
@@ -65,12 +75,14 @@ module spe_functional_block (interface dptzr_opcode, dptzr_packet_data,
 
 		case(opcode)
 			`OP_PARTIAL_SUM: begin
-					$display("Received partial sum = %d", data);
+					$display("SPE %d: Received partial sum = %d from PPE", PE_ID, data);
 					sum += data;
+					temp_vals[ctr] = data;
 					ctr += 1; // increase count (for 5x5 filter, we have 5 per final value)
 
 					// Finished aggregating
 					if(ctr == 5) begin
+						$display("sum = %d + %d + %d + %d + %d", temp_vals[0], temp_vals[1], temp_vals[2], temp_vals[3], temp_vals[4]);
 						
 						// no previous potential during timestep 1
 						if(ts == 1) begin

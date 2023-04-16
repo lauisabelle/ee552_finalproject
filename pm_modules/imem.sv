@@ -167,13 +167,13 @@ module imem (interface load_start, interface ifmap_addr, interface ifmap_data,
                     $display("IMEM: PPE 5 Requesting Inputs");
                     packet[ADDR_START:ADDR_END] = 4'(`OP_PPE_5_REQ_INPUT); // SEND BACK TO WHERE IT CAME FROM
                     packet[OPCODE_START:OPCODE_END] = 4'(`OP_PPE_INPUT); 
-                    $display("ptr = %d", pe5_ptr);
+                    // $display("ptr = %d", pe5_ptr);
                     if(ts == 1) begin
-                        $display("val = %b", t1_mem[(pe5_ptr + 24) -: IFMAP_SIZE]);
+                        // $display("val = %b", t1_mem[(pe5_ptr + 24) -: IFMAP_SIZE]);
                         packet[DATA_START:DATA_END] = 25'(t1_mem[(pe5_ptr + 24) -: IFMAP_SIZE]);
                     end
                     else begin
-                        $display("val = %b", t2_mem[(pe5_ptr + 24) -: IFMAP_SIZE]);
+                        // $display("val = %b", t2_mem[(pe5_ptr + 24) -: IFMAP_SIZE]);
                         packet[DATA_START:DATA_END] = 25'(t2_mem[(pe5_ptr + 24) -: IFMAP_SIZE]);
                     end
                     router_out.Send(packet);
