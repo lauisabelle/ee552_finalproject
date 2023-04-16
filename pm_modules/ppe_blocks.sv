@@ -131,6 +131,7 @@ module ppe_functional_block(interface w_cmd, w_waddr, w_wdata, w_raddr, w_rdata,
 	logic [1:0] ts = 1;
 	logic [3:0] dest_pe = 0;
 	// logic [2:0] cnt_input_rows = 0; // counts num input rows received
+	logic [8:0] cnt = 0;
 
 	logic input_data;
 	logic [`WEIGHT_WIDTH-1:0] weight;
@@ -164,7 +165,8 @@ module ppe_functional_block(interface w_cmd, w_waddr, w_wdata, w_raddr, w_rdata,
 			`OP_INPUT: begin
 					$display("OP:RECV -- INPUTS");
 					
-					isum_ptr = 0; // Prepare to process the next set of inputs					
+					isum_ptr = 0; // Prepare to process the next set of inputs	
+					cnt += 1;				
 					// cnt_input_rows += 1; // Increase count
 
 					// Send inputs to Input Register File
@@ -198,14 +200,19 @@ module ppe_functional_block(interface w_cmd, w_waddr, w_wdata, w_raddr, w_rdata,
 						end
 
 						$display("PPE %d: Sending partial sum=%d to packetizer. This is ts=%d", PE_ID, partial_sum, ts);
-					
-						// Send data to Packetizer, which will be forwarded to SPE
-						ptzr_dest_address.Send(4'(dest_pe));
-						ptzr_opcode.Send(4'(0));
-						ptzr_packet_data.Send(25'(partial_sum));
-						#BL;
 
+						// only request if there is more data left in the timestep
+						if(cnt != 441) begin
+							// Send data to Packetizer, which will be forwarded to SPE
+							ptzr_dest_address.Send(4'(dest_pe));
+							ptzr_opcode.Send(4'(0));
+							ptzr_packet_data.Send(25'(partial_sum));
+							#BL;
+							
+						end
+						
 						dest_pe = (dest_pe + 1) % FILTER_SIZE; // cycle through all of the SPE's 0 - 4
+						
 
 						// // Prepare to read the next set of data
 						// if(isum_ptr + 1 % OUTPUT_DIM == 0) begin

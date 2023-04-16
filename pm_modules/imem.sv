@@ -180,7 +180,8 @@ module imem (interface load_start, interface ifmap_addr, interface ifmap_data,
                     $display("IMEM: Sent more inputs to PPE 5");
                     #FL;
 
-                    pe5_ptr += 5 * IFMAP_SIZE; // prepare for next set
+                    // pe5_ptr += 5 * IFMAP_SIZE; // prepare for next set
+                    pe5_ptr += IFMAP_SIZE;
             end
 
             `OP_PPE_6_REQ_INPUT : begin
@@ -200,7 +201,8 @@ module imem (interface load_start, interface ifmap_addr, interface ifmap_data,
                     $display("IMEM: Sent more inputs to PPE 6");
                     #FL;
 
-                    pe6_ptr += 5 * IFMAP_SIZE; // prepare for next set
+                    // pe6_ptr += 5 * IFMAP_SIZE; // prepare for next set
+                    pe6_ptr += IFMAP_SIZE;
             end
 
             `OP_PPE_7_REQ_INPUT : begin
@@ -220,7 +222,8 @@ module imem (interface load_start, interface ifmap_addr, interface ifmap_data,
                     $display("IMEM: Sent more inputs to PPE 7");
                     #FL;
 
-                    pe7_ptr += 5 * IFMAP_SIZE; // prepare for next set
+                    // pe7_ptr += 5 * IFMAP_SIZE; // prepare for next set
+                    pe7_ptr += IFMAP_SIZE;
             end
 
             `OP_PPE_8_REQ_INPUT : begin
@@ -240,7 +243,8 @@ module imem (interface load_start, interface ifmap_addr, interface ifmap_data,
                     $display("IMEM: Sent more inputs to PPE 8");
                     #FL;
 
-                    pe8_ptr += 5 * IFMAP_SIZE; // prepare for next set
+                    // pe8_ptr += 5 * IFMAP_SIZE; // prepare for next set
+                    pe8_ptr += IFMAP_SIZE;
             end
 
             `OP_PPE_9_REQ_INPUT : begin
@@ -260,7 +264,8 @@ module imem (interface load_start, interface ifmap_addr, interface ifmap_data,
                     $display("IMEM: Sent more inputs to PPE 9");
                     #FL;
 
-                    pe9_ptr += 5 * IFMAP_SIZE; // prepare for next set
+                    // pe9_ptr += 5 * IFMAP_SIZE; // prepare for next set
+                    pe9_ptr += IFMAP_SIZE;
             end
 
 

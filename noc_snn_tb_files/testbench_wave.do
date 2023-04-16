@@ -83,7 +83,30 @@ add wave -radix binary -noupdate {/testbench/dut/ppe_mod8/irf/inputs_mem }
 add wave -radix unsigned -noupdate {/testbench/dut/ppe_mod9/wrf/weights_mem }
 add wave -radix binary -noupdate {/testbench/dut/ppe_mod9/irf/inputs_mem }
 
+add wave -radix unsigned -noupdate {/testbench/dut/ppe_mod5/ppe_fb/partial_sum }
+add wave -radix unsigned -noupdate {/testbench/dut/ppe_mod5/ppe_fb/isum_ptr}
+add wave -radix unsigned -noupdate {/testbench/dut/ppe_mod5/ppe_fb/input_data} 
+add wave -radix unsigned -noupdate {/testbench/dut/ppe_mod5/ppe_fb/weight }
 
+add wave -radix unsigned -noupdate {/testbench/dut/ppe_mod6/ppe_fb/partial_sum }
+add wave -radix unsigned -noupdate {/testbench/dut/ppe_mod6/ppe_fb/isum_ptr}
+add wave -radix unsigned -noupdate {/testbench/dut/ppe_mod6/ppe_fb/input_data} 
+add wave -radix unsigned -noupdate {/testbench/dut/ppe_mod6/ppe_fb/weight }
+
+add wave -radix unsigned -noupdate {/testbench/dut/ppe_mod7/ppe_fb/partial_sum }
+add wave -radix unsigned -noupdate {/testbench/dut/ppe_mod7/ppe_fb/isum_ptr}
+add wave -radix unsigned -noupdate {/testbench/dut/ppe_mod7/ppe_fb/input_data} 
+add wave -radix unsigned -noupdate {/testbench/dut/ppe_mod7/ppe_fb/weight }
+
+add wave -radix unsigned -noupdate {/testbench/dut/ppe_mod8/ppe_fb/partial_sum }
+add wave -radix unsigned -noupdate {/testbench/dut/ppe_mod8/ppe_fb/isum_ptr}
+add wave -radix unsigned -noupdate {/testbench/dut/ppe_mod8/ppe_fb/input_data} 
+add wave -radix unsigned -noupdate {/testbench/dut/ppe_mod8/ppe_fb/weight }
+
+add wave -radix unsigned -noupdate {/testbench/dut/ppe_mod9/ppe_fb/partial_sum }
+add wave -radix unsigned -noupdate {/testbench/dut/ppe_mod9/ppe_fb/isum_ptr}
+add wave -radix unsigned -noupdate {/testbench/dut/ppe_mod9/ppe_fb/input_data} 
+add wave -radix unsigned -noupdate {/testbench/dut/ppe_mod9/ppe_fb/weight }
 
 
 TreeUpdate [SetDefaultTree]
@@ -120,3 +143,5 @@ configure wave -timelineunits ns
 /testbench/dut/ppe_mod8/irf/inputs_mem 
 /testbench/dut/ppe_mod9/wrf/weights_mem 
 /testbench/dut/ppe_mod9/irf/inputs_mem 
+
+
