@@ -156,11 +156,11 @@ module imem (interface load_start, interface ifmap_addr, interface ifmap_data,
                     end
 
                     // Initialize the pointers
-                    pe5_ptr = 5 * IFMAP_SIZE;
-                    pe6_ptr = 6 * IFMAP_SIZE;
-                    pe7_ptr = 7 * IFMAP_SIZE;
-                    pe8_ptr = 8 * IFMAP_SIZE;
-                    pe9_ptr = 9 * IFMAP_SIZE;
+                    pe5_ptr = 1 * IFMAP_SIZE;
+                    pe6_ptr = 2 * IFMAP_SIZE;
+                    pe7_ptr = 3 * IFMAP_SIZE;
+                    pe8_ptr = 4 * IFMAP_SIZE;
+                    pe9_ptr = 5 * IFMAP_SIZE;
             end
             
             `OP_PPE_5_REQ_INPUT : begin
