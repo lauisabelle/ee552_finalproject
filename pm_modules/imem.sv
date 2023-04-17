@@ -51,13 +51,7 @@ module imem (interface load_start, interface ifmap_addr, interface ifmap_data,
     logic [OPCODE_START:OPCODE_END] opcode;
     logic signed [DATA_START - DATA_END:0] data;
     logic [4:0] OUTPUT_DIM = IFMAP_SIZE - FILTER_SIZE + 1;
-    //logic signed [`WEIGHT_WIDTH-1:0] weights_mem [`NUM_WEIGHTS:0]; // array of MAX_NUM_WEIGHTS 8-bit elements
-    //logic signed [`NUM_INPUTS-1:0] inputs_mem; // array of MAX_NUM_INPUTS 1-bit elements
     logic signed [`SUM_WIDTH:0] partial_sum = 0;
-
-    // Pointers
-  //  logic t1_mem [IFMAP_SIZE * IFMAP_SIZE : 0];
-   // logic t2_mem [IFMAP_SIZE * IFMAP_SIZE : 0];
 
 	logic [(IFMAP_SIZE*IFMAP_SIZE)-1:0]t1_mem ;
     logic [(IFMAP_SIZE*IFMAP_SIZE)-1:0]t2_mem;
@@ -167,20 +161,16 @@ module imem (interface load_start, interface ifmap_addr, interface ifmap_data,
                     $display("IMEM: PPE 5 Requesting Inputs");
                     packet[ADDR_START:ADDR_END] = 4'(`OP_PPE_5_REQ_INPUT); // SEND BACK TO WHERE IT CAME FROM
                     packet[OPCODE_START:OPCODE_END] = 4'(`OP_PPE_INPUT); 
-                    // $display("ptr = %d", pe5_ptr);
                     if(ts == 1) begin
-                        // $display("val = %b", t1_mem[(pe5_ptr + 24) -: IFMAP_SIZE]);
                         packet[DATA_START:DATA_END] = 25'(t1_mem[(pe5_ptr + 24) -: IFMAP_SIZE]);
                     end
                     else begin
-                        // $display("val = %b", t2_mem[(pe5_ptr + 24) -: IFMAP_SIZE]);
                         packet[DATA_START:DATA_END] = 25'(t2_mem[(pe5_ptr + 24) -: IFMAP_SIZE]);
                     end
                     router_out.Send(packet);
                     $display("IMEM: Sent more inputs to PPE 5");
                     #FL;
 
-                    // pe5_ptr += 5 * IFMAP_SIZE; // prepare for next set
                     pe5_ptr += IFMAP_SIZE;
             end
 
@@ -201,7 +191,6 @@ module imem (interface load_start, interface ifmap_addr, interface ifmap_data,
                     $display("IMEM: Sent more inputs to PPE 6");
                     #FL;
 
-                    // pe6_ptr += 5 * IFMAP_SIZE; // prepare for next set
                     pe6_ptr += IFMAP_SIZE;
             end
 
@@ -222,7 +211,6 @@ module imem (interface load_start, interface ifmap_addr, interface ifmap_data,
                     $display("IMEM: Sent more inputs to PPE 7");
                     #FL;
 
-                    // pe7_ptr += 5 * IFMAP_SIZE; // prepare for next set
                     pe7_ptr += IFMAP_SIZE;
             end
 
@@ -243,7 +231,6 @@ module imem (interface load_start, interface ifmap_addr, interface ifmap_data,
                     $display("IMEM: Sent more inputs to PPE 8");
                     #FL;
 
-                    // pe8_ptr += 5 * IFMAP_SIZE; // prepare for next set
                     pe8_ptr += IFMAP_SIZE;
             end
 
@@ -264,7 +251,6 @@ module imem (interface load_start, interface ifmap_addr, interface ifmap_data,
                     $display("IMEM: Sent more inputs to PPE 9");
                     #FL;
 
-                    // pe9_ptr += 5 * IFMAP_SIZE; // prepare for next set
                     pe9_ptr += IFMAP_SIZE;
             end
 

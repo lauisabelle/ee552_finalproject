@@ -8,7 +8,6 @@
 `define OP_PARTIAL_SUM_PPE7 7
 `define OP_PARTIAL_SUM_PPE8 8
 `define OP_PARTIAL_SUM_PPE9 9
-
 `define OP_RESIDUAL_VALUE 0
 
 
@@ -47,25 +46,16 @@ module spe_functional_block (interface dptzr_opcode, dptzr_packet_data,
 	logic [OPCODE_START - OPCODE_END:0] opcode;
 	logic [DATA_START - DATA_END:0] data;
 	logic [DATA_START - DATA_END:0] prev_potential_val;
-
 	logic [4:0] OUTPUT_DIM = IFMAP_SIZE - FILTER_SIZE + 1;
-
-	logic [13:0] temp_vals [6:0];
 	
+	logic [13:0] temp_vals [6:0];
 	logic [DATA_START - DATA_END:0] sum = 0;
 
-	// logic[$clog2(FILTER_SIZE):0] ctr = 0;
-
-		//logic [9:0] cnt_for_timestep = 0;
-	
 	logic [1:0] ts = 1;
 	logic spike;
 	logic [`SUM_WIDTH-1:0] new_potential;
 
-
-	// logic [`SUM_WIDTH-1:0] partial_sums [29:0]; // STORES MAX  PARTIAL SUMS PER PPE
 	logic f5, f6, f7, f8, f9 = 0; // track if we have all data for the partial sum
-	// logic [3:0] pe5_ptr, pe6_ptr, pe7_ptr, pe8_ptr, pe9_ptr = 0; // tracks position in the array
 
 	 // bounded queue of max size 6 elements
 	logic [`SUM_WIDTH-1:0] ppe5_sums [$];
@@ -80,7 +70,6 @@ module spe_functional_block (interface dptzr_opcode, dptzr_packet_data,
 
 		// Receive depacketized data
 		fork
-			// dptzr_dest_address.Receive(dest_address);
 			dptzr_opcode.Receive(opcode);
 			dptzr_packet_data.Receive(data);
 		join
@@ -95,24 +84,18 @@ module spe_functional_block (interface dptzr_opcode, dptzr_packet_data,
 					// store values in the queue
 					if(opcode == `OP_PARTIAL_SUM_PPE5) begin
 						ppe5_sums.push_back(data);
-						// f5 = 1;
 					end
 					else if(opcode == `OP_PARTIAL_SUM_PPE6) begin
 						ppe6_sums.push_back(data);
-						// f6 = 1;
 					end
 					else if(opcode == `OP_PARTIAL_SUM_PPE7) begin
-						// ppe7_sums = {ppe7_sums, data};
 						ppe7_sums.push_back(data);
-						// f7 = 1;
 					end
 					else if(opcode == `OP_PARTIAL_SUM_PPE8) begin
 						ppe8_sums.push_back(data);
-						// f8 = 1;
 					end
 					else if(opcode == `OP_PARTIAL_SUM_PPE9) begin
 						ppe9_sums.push_back(data);
-						// f9 = 1;
 					end
 
 					// Aggregate the partial sums
@@ -144,9 +127,6 @@ module spe_functional_block (interface dptzr_opcode, dptzr_packet_data,
 							dptzr_opcode.Receive(opcode);
 							dptzr_packet_data.Receive(data);
 
-
-
-
 							while(opcode != `OP_RESIDUAL_VALUE) begin
 
 								if(opcode == `OP_PARTIAL_SUM_PPE5) begin
@@ -156,7 +136,6 @@ module spe_functional_block (interface dptzr_opcode, dptzr_packet_data,
 									ppe6_sums.push_back(data);
 								end
 								else if(opcode == `OP_PARTIAL_SUM_PPE7) begin
-									// ppe7_sums = {ppe7_sums, data};
 									ppe7_sums.push_back(data);
 								end
 								else if(opcode == `OP_PARTIAL_SUM_PPE8) begin
@@ -171,13 +150,6 @@ module spe_functional_block (interface dptzr_opcode, dptzr_packet_data,
 
 							end
 							
-
-
-
-
-
-
-
 							$display("SPE %d: Received residual data = %d", PE_ID, data);
 							#FL;
 

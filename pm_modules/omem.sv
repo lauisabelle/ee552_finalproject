@@ -71,7 +71,6 @@ module omem (interface start_r, interface out_spike_data, interface out_spike_ad
     logic spike;
     logic [`SUM_WIDTH-1:0] spe_id;
 
-
     logic [WIDTH_addr-1:0] pe0_ptr = 0;
     logic [WIDTH_addr-1:0] pe1_ptr = 1;
     logic [WIDTH_addr-1:0] pe2_ptr = 2;
