@@ -141,22 +141,22 @@ module spe_functional_block (interface dptzr_opcode, dptzr_packet_data,
 							#FL;
 
 							prev_potential_val = data;
-							$display("Received residual value = %d", prev_potential_val);
+							$display("SPE %d: Received residual value = %d", PE_ID, prev_potential_val);
 						end
 
 						new_potential = 13'(prev_potential_val + sum);
-						$display("Old sum = %d", sum);
-						$display("New value = %d", new_potential);
+						$display("SPE %d: Partial sum = %d", PE_ID, sum);
+						$display("SPE %d: Partial + Residual Sums = %d", PE_ID, new_potential);
 						
 						if(new_potential > threshold) begin
-							$display("New potential exceeds threshold: %d > %d", new_potential, threshold);
+							$display("SPE %d: New potential exceeds threshold: %d > %d", PE_ID, new_potential, threshold);
 							$display("spike = 1");
 							spike = 1;
 							new_potential = new_potential - threshold;
 							$display("Residual threshold: %d", new_potential);
 						end
 						else begin
-							$display("New potential is below threshold: %d < %d", new_potential, threshold);
+							$display("SPE %d: New potential is below threshold: %d < %d", PE_ID, new_potential, threshold);
 							$display("spike = 0");
 							spike = 0;
 						end
