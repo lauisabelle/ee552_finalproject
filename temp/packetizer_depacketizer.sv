@@ -66,7 +66,7 @@ module depacketizer(interface depacketizer_in, interface dest_address, interface
 		#FL; 
 		
 		fork
-			// dest_address.Send(packet[ADDR_START:ADDR_END]);
+			dest_address.Send(packet[ADDR_START:ADDR_END]);
 			opcode.Send(packet[OPCODE_START:OPCODE_END]);
 			packet_data.Send(packet[DATA_START:DATA_END]);
 		join

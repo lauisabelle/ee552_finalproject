@@ -224,8 +224,6 @@ module ppe_functional_block(interface w_cmd, w_waddr, w_wdata, w_raddr, w_rdata,
 			`OP_TIMESTEP_DONE: begin
 				$display("OP:RECV -- TIMESTEP DONE");
 				ts = 2;
-				cnt = 0;
-				dest_pe = 0;
 				// cnt_input_rows = 0; // reset
 			end
 		endcase

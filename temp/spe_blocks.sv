@@ -69,6 +69,9 @@ module spe_functional_block (interface dptzr_opcode, dptzr_packet_data,
 	logic [`SUM_WIDTH-1:0] ppe8_sums [$];
 	logic [`SUM_WIDTH-1:0] ppe9_sums [$];
 
+
+
+
 	always begin
 
 		$display("%m: Waiting to receive data from depacketizer");	
@@ -111,7 +114,8 @@ module spe_functional_block (interface dptzr_opcode, dptzr_packet_data,
 					end
 
 					// Aggregate the partial sums
-					while (ppe5_sums.size() & ppe6_sums.size() & ppe7_sums.size() & ppe8_sums.size() & ppe9_sums.size()) begin
+					if(ppe5_sums.size() & ppe6_sums.size() & ppe7_sums.size() & 
+							ppe8_sums.size() & ppe9_sums.size()) begin
 						temp_vals[0] = ppe5_sums.pop_front();
 						temp_vals[1] = ppe6_sums.pop_front();
 						temp_vals[2] = ppe7_sums.pop_front();
@@ -120,55 +124,73 @@ module spe_functional_block (interface dptzr_opcode, dptzr_packet_data,
 						$display("Received all partial sums: %d + %d + %d + %d + %d", temp_vals[0], temp_vals[1], temp_vals[2], temp_vals[3], temp_vals[4]);
 
 						sum += temp_vals[0] + temp_vals[1] + temp_vals[2] + temp_vals[3] + temp_vals[4];
+						// $display("sum = %d + %d + %d + %d + %d", temp_vals[0], temp_vals[1], temp_vals[2], temp_vals[3], temp_vals[4]);
 						
-						// no previous potential during timestep 1
-						if(ts == 1) begin
-							$display("No previous potential val");
-							prev_potential_val = 0;
-						end
-						else begin
-						
-							// Send request for previous timestep's membrane potential to Packetizer
-							$display("Sending req for residual value to packetizer");
-							ptzr_dest_address.Send(4'(`OMEM_ID));
-							ptzr_opcode.Send(4'({3'(PE_ID), 1'(1)}));
-							ptzr_packet_data.Send(25'({3'(PE_ID), 1'(1)}));
-							#BL;
+					// end
+					
 
-							// Receive the previous potential value from depacketizer
-							dptzr_opcode.Receive(opcode);
-							dptzr_packet_data.Receive(data);
-							#FL;
+					// sum += data;
+					// temp_vals[ctr] = data;
+					// ctr += 1; // increase count (for 5x5 filter, we have 5 per final value)
 
-							prev_potential_val = data;
-							$display("Received residual value = %d", prev_potential_val);
-						end
-
-						new_potential = 13'(prev_potential_val + sum);
-						$display("Old sum = %d", sum);
-						$display("New value = %d", new_potential);
+					// Finished aggregating
+					// if(ctr == 5) begin
 						
-						if(new_potential > threshold) begin
-							$display("New potential exceeds threshold: %d > %d", new_potential, threshold);
-							$display("spike = 1");
-							spike = 1;
-							new_potential = new_potential - threshold;
-							$display("Residual threshold: %d", new_potential);
-						end
-						else begin
-							$display("New potential is below threshold: %d < %d", new_potential, threshold);
-							$display("spike = 0");
-							spike = 0;
-						end
 						
-						// Send new membrane potential to Packetizer
-						$display("Sending new potential and spike to packetizer to send to OMEM");
+					// no previous potential during timestep 1
+					if(ts == 1) begin
+						$display("No previous potential val");
+						prev_potential_val = 0;
+					end
+					else begin
+					
+						// Send request for previous timestep's membrane potential to Packetizer
+						$display("Sending req for residual value to packetizer");
 						ptzr_dest_address.Send(4'(`OMEM_ID));
-						ptzr_opcode.Send(4'({3'(PE_ID), 1'(0)}));
-						ptzr_packet_data.Send(25'({13'(new_potential), 1'(spike)}));
+						ptzr_opcode.Send(4'({3'(PE_ID), 1'(1)}));
+						ptzr_packet_data.Send(25'({3'(PE_ID), 1'(1)}));
 						#BL;
 
-						sum = 0; // reset sum for next set of partial sums
+						// Receive the previous potential value from depacketizer
+						dptzr_opcode.Receive(opcode);
+						dptzr_packet_data.Receive(data);
+						#FL;
+
+						prev_potential_val = data;
+						$display("Received residual value = %d", prev_potential_val);
+					end
+
+					new_potential = 13'(prev_potential_val + sum);
+					$display("Old sum = %d", sum);
+					$display("New value = %d", new_potential);
+					
+					if(new_potential > threshold) begin
+						$display("New potential exceeds threshold: %d > %d", new_potential, threshold);
+						$display("spike = 1");
+						spike = 1;
+						new_potential = new_potential - threshold;
+						$display("Residual threshold: %d", new_potential);
+					end
+					else begin
+						$display("New potential is below threshold: %d < %d", new_potential, threshold);
+						$display("spike = 0");
+						spike = 0;
+					end
+					
+					// Send new membrane potential to Packetizer
+					$display("Sending new potential and spike to packetizer to send to OMEM");
+					ptzr_dest_address.Send(4'(`OMEM_ID));
+					ptzr_opcode.Send(4'({3'(PE_ID), 1'(0)}));
+					ptzr_packet_data.Send(25'({13'(new_potential), 1'(spike)}));
+					#BL;
+
+					// ctr = 0; // reset ctr
+					sum = 0; // reset sum for next set of partial sums
+					// f5 = 0;
+					// f6 = 0;
+					// f7 = 0;
+					// f8 = 0;
+					// f9 = 0;
 				end
 			end
 			`OP_FIRST_TIMESTEP_DONE: begin
@@ -178,5 +200,3 @@ module spe_functional_block (interface dptzr_opcode, dptzr_packet_data,
 
 	end
 endmodule
-
-

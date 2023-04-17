@@ -248,7 +248,7 @@ module omem (interface start_r, interface out_spike_data, interface out_spike_ad
 
             if(ts == 1) begin
                 // Send end of timestep packet to all modules
-                for(int i = 0; i < 12; i++) begin
+                for(int i = 0; i < 11; i++) begin
                     $display("Sending timestep packet to pe_id=%d", i);
                     packet = 0;
                     packet[ADDR_START:ADDR_END] = 4'(i); // respond to sender of request packet
