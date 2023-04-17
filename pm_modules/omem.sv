@@ -16,6 +16,8 @@
 `define OP_SPE_3_REQ_DATA 7 // OPCODE: SPE 0 requests previous value
 `define OP_SPE_4_REQ_DATA 9 // OPCODE: SPE 0 requests previous value
 
+`define OP_RESIDUAL_VALUE 0
+
 `define OP_TIMESTEP_DONE 15 // OPCODE: PPE 9 requests more inputs
 
 `define WEIGHT_WIDTH 8
@@ -75,8 +77,17 @@ module omem (interface start_r, interface out_spike_data, interface out_spike_ad
     logic [WIDTH_addr-1:0] pe2_ptr = 2;
     logic [WIDTH_addr-1:0] pe3_ptr = 3;
     logic [WIDTH_addr-1:0] pe4_ptr = 4;
+    
+    logic [WIDTH_addr-1:0] pe0_req_ptr = 0;
+    logic [WIDTH_addr-1:0] pe1_req_ptr = 1;
+    logic [WIDTH_addr-1:0] pe2_req_ptr = 2;
+    logic [WIDTH_addr-1:0] pe3_req_ptr = 3;
+    logic [WIDTH_addr-1:0] pe4_req_ptr = 4;
 
     logic [1:0] ts = 1;
+
+
+    logic [8:0] cnt = 0;
 
 
     // Receive spikes, residual values, and requests for previous values
@@ -90,6 +101,7 @@ module omem (interface start_r, interface out_spike_data, interface out_spike_ad
             new_potential = data[DATA_START:DATA_END+1];
             spike = data[DATA_END]; // spike is LSB
 		    $display("Received store request from spe_id=%d, data = %d", packet[OPCODE_START:OPCODE_END+1], data);
+            cnt += 1;
         end
         else begin
             spe_id = packet[OPCODE_START:OPCODE_END+1];
@@ -194,57 +206,64 @@ module omem (interface start_r, interface out_spike_data, interface out_spike_ad
             `OP_SPE_0_REQ_DATA :  begin
                     $display("From SPE 0");
                     packet[ADDR_START:ADDR_END] = 4'(spe_id); // respond to sender of request packet
-                    packet[OPCODE_START:OPCODE_END] = 4'(spe_id); // irrelevant
-                    packet[DATA_START:DATA_END] = 25'(t1_residue_mem[pe0_ptr]); // only t1 is used for requested residual data
+                    packet[OPCODE_START:OPCODE_END] = 4'(`OP_RESIDUAL_VALUE); 
+                    packet[DATA_START:DATA_END] = 25'(t1_residue_mem[pe0_req_ptr]); // only t1 is used for requested residual data
                     $display("ts2: sending data to spe = %d", spe_id);
-                    $display("ts2: residue = %d", t1_residue_mem[pe0_ptr]);
+                    $display("ts2: residue = %d", t1_residue_mem[pe0_req_ptr]);
                     router_out.Send(packet); 
+                    pe0_req_ptr += 5;
                     #FL;  
             end
             `OP_SPE_1_REQ_DATA :  begin
                     $display("From SPE 1");
                     packet[ADDR_START:ADDR_END] = 4'(spe_id); // respond to sender of request packet
-                    packet[OPCODE_START:OPCODE_END] = 4'(spe_id); // irrelevant
-                    packet[DATA_START:DATA_END] = 25'(t1_residue_mem[pe1_ptr]); // only t1 is used for requested residual data
+                    packet[OPCODE_START:OPCODE_END] = 4'(`OP_RESIDUAL_VALUE); 
+                    packet[DATA_START:DATA_END] = 25'(t1_residue_mem[pe1_req_ptr]); // only t1 is used for requested residual data
                     $display("ts2: sending data to spe = %d", spe_id);
-                    $display("ts2: residue = %d", t1_residue_mem[pe1_ptr]);
+                    $display("ts2: residue = %d", t1_residue_mem[pe1_req_ptr]);
                     router_out.Send(packet);
+                    pe1_req_ptr += 5;
                     #FL;  
             end
             `OP_SPE_2_REQ_DATA :  begin
                     $display("From SPE 2");
                     packet[ADDR_START:ADDR_END] = 4'(spe_id); // respond to sender of request packet
-                    packet[OPCODE_START:OPCODE_END] = 4'(spe_id); // irrelevant
-                    packet[DATA_START:DATA_END] = 25'(t1_residue_mem[pe2_ptr]); // only t1 is used for requested residual data
+                    packet[OPCODE_START:OPCODE_END] = 4'(`OP_RESIDUAL_VALUE);
+                    packet[DATA_START:DATA_END] = 25'(t1_residue_mem[pe2_req_ptr]); // only t1 is used for requested residual data
                     $display("ts2: sending data to spe = %d", spe_id);
-                    $display("ts2: residue = %d", t1_residue_mem[pe2_ptr]);
+                    $display("ts2: ptr = %d", pe2_req_ptr);
+                    $display("ts2: residue = %d", t1_residue_mem[pe2_req_ptr]);
                     router_out.Send(packet);
+                    pe2_req_ptr += 5;
                     #FL;  
             end
             `OP_SPE_3_REQ_DATA :  begin
                     $display("From SPE 3");
                     packet[ADDR_START:ADDR_END] = 4'(spe_id); // respond to sender of request packet
-                    packet[OPCODE_START:OPCODE_END] = 4'(spe_id); // irrelevant
-                    packet[DATA_START:DATA_END] = 25'(t1_residue_mem[pe3_ptr]); // only t1 is used for requested residual data
+                    packet[OPCODE_START:OPCODE_END] = 4'(`OP_RESIDUAL_VALUE); 
+                    packet[DATA_START:DATA_END] = 25'(t1_residue_mem[pe3_req_ptr]); // only t1 is used for requested residual data
                     $display("ts2: sending data to spe = %d", spe_id);
-                    $display("ts2: residue = %d", t1_residue_mem[pe3_ptr]);
+                    $display("ts2: residue = %d", t1_residue_mem[pe3_req_ptr]);
                     router_out.Send(packet);
+                    pe3_req_ptr += 5;
                     #FL;  
             end
             `OP_SPE_4_REQ_DATA :  begin
                     $display("From SPE 4");
                     packet[ADDR_START:ADDR_END] = 4'(spe_id); // respond to sender of request packet
-                    packet[OPCODE_START:OPCODE_END] = 4'(spe_id); // irrelevant
-                    packet[DATA_START:DATA_END] = 25'(t1_residue_mem[pe4_ptr]); // only t1 is used for requested residual data
+                    packet[OPCODE_START:OPCODE_END] = 4'(`OP_RESIDUAL_VALUE);
+                    packet[DATA_START:DATA_END] = 25'(t1_residue_mem[pe4_req_ptr]); // only t1 is used for requested residual data
                     $display("ts2: sending data to spe = %d", spe_id);
-                    $display("ts2: residue = %d", t1_residue_mem[pe4_ptr]);
+                    $display("ts2: residue = %d", t1_residue_mem[pe4_req_ptr]);
                     router_out.Send(packet);
+                    pe4_req_ptr += 5;
                     #FL;  
             end
         endcase
 
         // End of timestep (received all sums)
-        if(pe0_ptr == 445) begin // last index is 440, then 5 was added
+        if(cnt == 441) begin // last index is 440, then 5 was added
+            cnt = 0;
 
             if(ts == 1) begin
                 // Send end of timestep packet to all modules

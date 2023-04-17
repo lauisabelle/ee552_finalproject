@@ -8,6 +8,11 @@
 `define OP_PARTIAL_SUM_PPE7 7
 `define OP_PARTIAL_SUM_PPE8 8
 `define OP_PARTIAL_SUM_PPE9 9
+
+`define OP_RESIDUAL_VALUE 0
+
+
+
 `define OP_FIRST_TIMESTEP_DONE 15
 `define OP_PREVIOUS_POTENTIAL 2
 `define SUM_WIDTH 13
@@ -49,7 +54,7 @@ module spe_functional_block (interface dptzr_opcode, dptzr_packet_data,
 	
 	logic [DATA_START - DATA_END:0] sum = 0;
 
-	logic[$clog2(FILTER_SIZE):0] ctr = 0;
+	// logic[$clog2(FILTER_SIZE):0] ctr = 0;
 
 		//logic [9:0] cnt_for_timestep = 0;
 	
@@ -129,7 +134,7 @@ module spe_functional_block (interface dptzr_opcode, dptzr_packet_data,
 						else begin
 						
 							// Send request for previous timestep's membrane potential to Packetizer
-							$display("Sending req for residual value to packetizer");
+							$display("PE %d: Sending req for residual value to packetizer", PE_ID);
 							ptzr_dest_address.Send(4'(`OMEM_ID));
 							ptzr_opcode.Send(4'({3'(PE_ID), 1'(1)}));
 							ptzr_packet_data.Send(25'({3'(PE_ID), 1'(1)}));
@@ -138,6 +143,42 @@ module spe_functional_block (interface dptzr_opcode, dptzr_packet_data,
 							// Receive the previous potential value from depacketizer
 							dptzr_opcode.Receive(opcode);
 							dptzr_packet_data.Receive(data);
+
+
+
+
+							while(opcode != `OP_RESIDUAL_VALUE) begin
+
+								if(opcode == `OP_PARTIAL_SUM_PPE5) begin
+									ppe5_sums.push_back(data);
+								end
+								else if(opcode == `OP_PARTIAL_SUM_PPE6) begin
+									ppe6_sums.push_back(data);
+								end
+								else if(opcode == `OP_PARTIAL_SUM_PPE7) begin
+									// ppe7_sums = {ppe7_sums, data};
+									ppe7_sums.push_back(data);
+								end
+								else if(opcode == `OP_PARTIAL_SUM_PPE8) begin
+									ppe8_sums.push_back(data);
+								end
+								else if(opcode == `OP_PARTIAL_SUM_PPE9) begin
+									ppe9_sums.push_back(data);
+								end
+
+								dptzr_opcode.Receive(opcode);
+								dptzr_packet_data.Receive(data);
+
+							end
+							
+
+
+
+
+
+
+
+							$display("SPE %d: Received residual data = %d", PE_ID, data);
 							#FL;
 
 							prev_potential_val = data;
@@ -173,6 +214,7 @@ module spe_functional_block (interface dptzr_opcode, dptzr_packet_data,
 			end
 			`OP_FIRST_TIMESTEP_DONE: begin
 						ts = 2;
+						sum = 0;
 			end
 		endcase
 
