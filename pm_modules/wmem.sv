@@ -94,7 +94,7 @@ module wmem (interface load_start, interface filter_addr, interface filter_data,
         // Send signal to IMEM that weights have been dispersed
         packet = 0;
         packet[ADDR_START:ADDR_END] = `IMEM_ID;
-        packet[OPCODE_START:OPCODE_END] = OP_WEIGHTS_DONE;
+        packet[OPCODE_START:OPCODE_END] = `OP_WEIGHTS_DONE;
         packet[DATA_START:DATA_END] = 0; // irrelevant
         $display("Sending weights done packet to IMEM");
         router_out.Send(packet); // send first 3 weights
