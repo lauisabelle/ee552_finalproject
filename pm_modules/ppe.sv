@@ -30,11 +30,11 @@ Channel #(.hsProtocol(P4PhaseBD), .WIDTH(3)) w_raddr ();
 Channel #(.hsProtocol(P4PhaseBD), .WIDTH(8)) w_rdata (); 
 
 // Input RF Interfaces
-Channel #(.hsProtocol(P4PhaseBD), .WIDTH(1)) i_cmd (); 
+Channel #(.hsProtocol(P4PhaseBD), .WIDTH(2)) i_cmd (); 
 Channel #(.hsProtocol(P4PhaseBD), .WIDTH($clog2(`NUM_INPUTS))) i_waddr (); 
 Channel #(.hsProtocol(P4PhaseBD), .WIDTH(25)) i_wdata (); 
 Channel #(.hsProtocol(P4PhaseBD), .WIDTH($clog2(`NUM_INPUTS))) i_raddr (); 
-Channel #(.hsProtocol(P4PhaseBD), .WIDTH(1)) i_rdata (); 
+Channel #(.hsProtocol(P4PhaseBD), .WIDTH(25)) i_rdata (); 
 
 // Packetizer Interfaces
 Channel #(.hsProtocol(P4PhaseBD), .WIDTH(4)) ptzr_dest_address (); 

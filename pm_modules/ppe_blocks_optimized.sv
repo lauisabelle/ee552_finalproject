@@ -24,6 +24,7 @@
 
 `define WRITE_CMD 0
 `define READ_CMD  1
+`define GET_ALL_INPUTS 2
 
 import SystemVerilogCSP::*;
 
@@ -72,7 +73,7 @@ module input_rf(interface command, interface write_data, interface write_addr, i
 	parameter BL = 2;
 	parameter FL = 2;
 	
-	logic cmd;
+	logic [1:0] cmd;
 	logic [`NUM_INPUTS-1:0] inputs_mem; // array of MAX_NUM_INPUTS 1-bit elements
 	logic [`NUM_INPUTS-1:0] inputs;
 	logic [$clog2(`NUM_INPUTS) - 1:0] raddr;
@@ -80,6 +81,7 @@ module input_rf(interface command, interface write_data, interface write_addr, i
 	always begin
 
 		command.Receive(cmd); // receive read, write command
+        $display("Received command=%d", cmd);
 		#FL;
 		case(cmd)
 			`WRITE_CMD: begin
@@ -93,6 +95,13 @@ module input_rf(interface command, interface write_data, interface write_addr, i
 				read_addr.Receive(raddr);
 				#FL;
 				read_data.Send(inputs_mem[raddr]);
+				#BL;
+			end
+
+			`GET_ALL_INPUTS: begin
+				//read_addr.Receive(raddr);
+				//#FL;
+				read_data.Send(inputs_mem[`NUM_INPUTS-1:0]);
 				#BL;
 			end
 		endcase
@@ -268,16 +277,16 @@ module ppe_functional_block(interface w_cmd, w_waddr, w_wdata, w_raddr, w_rdata,
 				// data = 0;
 
 				// get all inputs
-				for(int i = 0; i < `NUM_INPUTS; i++) begin
+				// for(int i = 0; i < `NUM_INPUTS; i++) begin
 
-					i_cmd.Send(`READ_CMD);
-					i_raddr.Send(i); 
+					i_cmd.Send(`GET_ALL_INPUTS);
+					//i_raddr.Send(0); 
 
 					// Receive input data
-					i_rdata.Receive(input_data);
-					data[i] = input_data;
+					i_rdata.Receive(data);
+					// data[i] = input_data;
 
-				end
+				// end
 				
 				$display("PE %d: Compare my_input_row = %d vs. req_input_row = %d", PE_ID, curr_row_idx, req_row_idx);
 				// we have the correct data --> send to requesting PPE
