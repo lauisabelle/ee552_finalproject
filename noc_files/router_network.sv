@@ -10,7 +10,7 @@ import SystemVerilogCSP::*;
 module router_network (interface pm0_in, interface pm0_out, interface pm1_in, interface pm1_out, interface pm2_in, interface pm2_out, interface pm3_in, interface pm3_out, interface pm4_in, interface pm4_out,
         interface pm5_in, interface pm5_out, interface pm6_in, interface pm6_out, interface pm7_in, interface pm7_out, interface pm8_in, interface pm8_out, interface pm9_in, interface pm9_out,
         interface pm10_in, interface pm10_out, interface pm11_in, interface pm11_out, interface pm12_in, interface pm12_out);
-    parameter WIDTH_PACKAGE = 33;
+    parameter WIDTH_PACKAGE = 50;
 
 
     // 2 phase protocol

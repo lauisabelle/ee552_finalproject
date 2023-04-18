@@ -61,7 +61,7 @@ module wmem (interface load_start, interface filter_addr, interface filter_data,
             for(int i = 0; i < `NUM_WEIGHTS * `NUM_WEIGHTS; i++) begin
                 filter_addr.Receive(f_addr);
                 filter_data.Receive(f_data);
-                filter_mem[f_addr] = 8'(f_data);
+                filter_mem[f_addr] = f_data;
                 $display("Received f_addr=%d, f_data=%d", f_addr, f_data);
                 #BL;
             end
@@ -76,15 +76,15 @@ module wmem (interface load_start, interface filter_addr, interface filter_data,
      
         for(int i = 0; i < FILTER_SIZE * FILTER_SIZE; i+=5) begin
             packet = 0;
-            packet[ADDR_START:ADDR_END] = 4'(current_PPE);
-            packet[OPCODE_START:OPCODE_END] = 4'(`OP_WEIGHT);
-            packet[DATA_START:DATA_END] = 25'({8'(filter_mem[i+2]), 8'(filter_mem[i+1]), 8'(filter_mem[i])});
-            $display("Sending data = %d, %d, %d to PPE=%d", 8'(filter_mem[i]), 8'(filter_mem[i+1]), 8'(filter_mem[i+2]), 4'(current_PPE));
+            packet[ADDR_START:ADDR_END] = current_PPE;
+            packet[OPCODE_START:OPCODE_END] = `OP_WEIGHT;
+            packet[DATA_START:DATA_END] = {filter_mem[i+2], filter_mem[i+1], filter_mem[i]};
+            $display("Sending data = %d, %d, %d to PPE=%d", filter_mem[i], filter_mem[i+1], filter_mem[i+2], current_PPE);
             router_out.Send(packet); // send first 3 weights
             #FL;
             
-            packet[DATA_START:DATA_END] = 25'({8'(filter_mem[i+4]), 8'(filter_mem[i+3])});
-            $display("Sending data = %d, %d to PPE=%d", 8'(filter_mem[i+3]), 8'(filter_mem[i+4]), 4'(current_PPE));
+            packet[DATA_START:DATA_END] = {filter_mem[i+4], filter_mem[i+3]};
+            $display("Sending data = %d, %d to PPE=%d", filter_mem[i+3], filter_mem[i+4], current_PPE);
             router_out.Send(packet);
             #FL;
 	    current_PPE += 1;
@@ -93,9 +93,9 @@ module wmem (interface load_start, interface filter_addr, interface filter_data,
 
         // Send signal to IMEM that weights have been dispersed
         packet = 0;
-        packet[ADDR_START:ADDR_END] = 4'(`IMEM_ID);
-        packet[OPCODE_START:OPCODE_END] = 4'(`OP_WEIGHTS_DONE);
-        packet[DATA_START:DATA_END] = 25'(0); // irrelevant
+        packet[ADDR_START:ADDR_END] = `IMEM_ID;
+        packet[OPCODE_START:OPCODE_END] = OP_WEIGHTS_DONE;
+        packet[DATA_START:DATA_END] = 0; // irrelevant
         $display("Sending weights done packet to IMEM");
         router_out.Send(packet); // send first 3 weights
         #FL;

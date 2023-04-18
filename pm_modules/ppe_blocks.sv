@@ -201,9 +201,9 @@ module ppe_functional_block(interface w_cmd, w_waddr, w_wdata, w_raddr, w_rdata,
 
 						// Send data to Packetizer, which will be forwarded to SPE
 						$display("PPE %d: Sending partial sum=%d to packetizer. This is ts=%d", PE_ID, partial_sum, ts);
-						ptzr_dest_address.Send(4'(dest_pe));
-						ptzr_opcode.Send(4'(PE_ID));
-						ptzr_packet_data.Send(25'(partial_sum));
+						ptzr_dest_address.Send(dest_pe);
+						ptzr_opcode.Send(PE_ID);
+						ptzr_packet_data.Send(partial_sum);
 						#BL;
 
 						dest_pe = (dest_pe + 1) % FILTER_SIZE; // cycle through all of the SPE's 0 - 4
@@ -214,9 +214,9 @@ module ppe_functional_block(interface w_cmd, w_waddr, w_wdata, w_raddr, w_rdata,
 					// Request more inputs if we haven't received 21 rows yet
 					if(cnt < OUTPUT_DIM) begin
 						$display("Requesting more inputs from IMEM. This is ts=%d", ts);
-						ptzr_dest_address.Send(4'(`IMEM_ID));
-						ptzr_opcode.Send(4'(PE_ID));
-						ptzr_packet_data.Send(25'(0)); // irrelevant
+						ptzr_dest_address.Send(`IMEM_ID);
+						ptzr_opcode.Send(PE_ID);
+						ptzr_packet_data.Send(0); // irrelevant
 						#BL;
 					end
 

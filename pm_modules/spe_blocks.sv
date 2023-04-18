@@ -118,9 +118,9 @@ module spe_functional_block (interface dptzr_opcode, dptzr_packet_data,
 						
 							// Send request for previous timestep's membrane potential to Packetizer
 							$display("PE %d: Sending req for residual value to packetizer", PE_ID);
-							ptzr_dest_address.Send(4'(`OMEM_ID));
-							ptzr_opcode.Send(4'({3'(PE_ID), 1'(1)}));
-							ptzr_packet_data.Send(25'({3'(PE_ID), 1'(1)}));
+							ptzr_dest_address.Send(`OMEM_ID);
+							ptzr_opcode.Send({PE_ID, 1'(1)});
+							ptzr_packet_data.Send({PE_ID, 1'(1)});
 							#BL;
 
 							// Receive the previous potential value from depacketizer
@@ -157,7 +157,7 @@ module spe_functional_block (interface dptzr_opcode, dptzr_packet_data,
 							$display("SPE %d: Received residual value = %d", PE_ID, prev_potential_val);
 						end
 
-						new_potential = 13'(prev_potential_val + sum);
+						new_potential = prev_potential_val + sum;
 						$display("SPE %d: Partial sum = %d", PE_ID, sum);
 						$display("SPE %d: Partial + Residual Sums = %d", PE_ID, new_potential);
 						
@@ -176,9 +176,9 @@ module spe_functional_block (interface dptzr_opcode, dptzr_packet_data,
 						
 						// Send new membrane potential to Packetizer
 						$display("Sending new potential and spike to packetizer to send to OMEM");
-						ptzr_dest_address.Send(4'(`OMEM_ID));
-						ptzr_opcode.Send(4'({3'(PE_ID), 1'(0)}));
-						ptzr_packet_data.Send(25'({13'(new_potential), 1'(spike)}));
+						ptzr_dest_address.Send(`OMEM_ID);
+						ptzr_opcode.Send({PE_ID, 1'(0)});
+						ptzr_packet_data.Send({new_potential, spike});
 						#BL;
 
 						sum = 0; // reset sum for next set of partial sums

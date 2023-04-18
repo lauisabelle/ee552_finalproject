@@ -86,11 +86,11 @@ module imem (interface load_start, interface ifmap_addr, interface ifmap_data,
                 ifmap_data.Receive(i_data);
                 $display("T1: Received i_addr=%d, i_data=%d", i_addr, i_data);
                 if(ts == 1) begin
-                    t1_mem[i_addr] = 1'(i_data);
+                    t1_mem[i_addr] = i_data;
                     $display("t1_mem updated: %d", t1_mem[i_addr]);
                 end
                 else if(ts == 2) begin
-                    t2_mem[i_addr] = 1'(i_data);
+                    t2_mem[i_addr] = i_data;
                 end
                 #BL;
             end
@@ -103,10 +103,10 @@ module imem (interface load_start, interface ifmap_addr, interface ifmap_data,
                 $display("T2: Received i_addr=%d, i_data=%d", i_addr, i_data);
                 $display("ts = %d", ts);
                 if(ts == 1) begin
-                    t1_mem[i_addr] = 1'(i_data);
+                    t1_mem[i_addr] = i_data;
                 end
                 else if(ts == 2) begin
-                    t2_mem[i_addr] = 1'(i_data);
+                    t2_mem[i_addr] = i_data;
                     $display("t2_mem updated: %d", t2_mem[i_addr]);
                 end
                 #BL;
@@ -136,13 +136,13 @@ module imem (interface load_start, interface ifmap_addr, interface ifmap_data,
                     $display("IMEM: Start sending inputs to PPE Modules");
                     // Send 1 row of data (25 inputs) to each of the PE modules
                     for(int i = 0; i < 5; i++) begin
-                        packet[ADDR_START:ADDR_END] = 4'(i+5);
-                        packet[OPCODE_START:OPCODE_END] = 4'(`OP_PPE_INPUT); 
+                        packet[ADDR_START:ADDR_END] = i+5;
+                        packet[OPCODE_START:OPCODE_END] = `OP_PPE_INPUT; 
                         if(ts == 1) begin
-			                packet[DATA_START:DATA_END] = 25'(t1_mem[((i+1) * IFMAP_SIZE) - 1 -: IFMAP_SIZE]);	
+			                packet[DATA_START:DATA_END] = t1_mem[((i+1) * IFMAP_SIZE) - 1 -: IFMAP_SIZE];	
                         end
                         else begin
-			                packet[DATA_START:DATA_END] = 25'(t2_mem[((i+1) * IFMAP_SIZE) - 1 -: IFMAP_SIZE]);
+			                packet[DATA_START:DATA_END] = t2_mem[((i+1) * IFMAP_SIZE) - 1 -: IFMAP_SIZE];
                         end
                         router_out.Send(packet);
                         $display("IMEM: Sent 25 inputs to PPE %d", i+5);
@@ -159,13 +159,13 @@ module imem (interface load_start, interface ifmap_addr, interface ifmap_data,
             
             `OP_PPE_5_REQ_INPUT : begin
                     $display("IMEM: PPE 5 Requesting Inputs");
-                    packet[ADDR_START:ADDR_END] = 4'(`OP_PPE_5_REQ_INPUT); // SEND BACK TO WHERE IT CAME FROM
-                    packet[OPCODE_START:OPCODE_END] = 4'(`OP_PPE_INPUT); 
+                    packet[ADDR_START:ADDR_END] = `OP_PPE_5_REQ_INPUT; // SEND BACK TO WHERE IT CAME FROM
+                    packet[OPCODE_START:OPCODE_END] = `OP_PPE_INPUT; 
                     if(ts == 1) begin
-                        packet[DATA_START:DATA_END] = 25'(t1_mem[(pe5_ptr + 24) -: IFMAP_SIZE]);
+                        packet[DATA_START:DATA_END] = t1_mem[(pe5_ptr + 24) -: IFMAP_SIZE];
                     end
                     else begin
-                        packet[DATA_START:DATA_END] = 25'(t2_mem[(pe5_ptr + 24) -: IFMAP_SIZE]);
+                        packet[DATA_START:DATA_END] = t2_mem[(pe5_ptr + 24) -: IFMAP_SIZE];
                     end
                     router_out.Send(packet);
                     $display("IMEM: Sent more inputs to PPE 5");
@@ -176,16 +176,16 @@ module imem (interface load_start, interface ifmap_addr, interface ifmap_data,
 
             `OP_PPE_6_REQ_INPUT : begin
                     $display("IMEM: PPE 6 Requesting Inputs");
-                    packet[ADDR_START:ADDR_END] = 4'(`OP_PPE_6_REQ_INPUT);
-                    packet[OPCODE_START:OPCODE_END] = 4'(`OP_PPE_INPUT); 
+                    packet[ADDR_START:ADDR_END] = `OP_PPE_6_REQ_INPUT;
+                    packet[OPCODE_START:OPCODE_END] = `OP_PPE_INPUT; 
                     $display("ptr = %d", pe6_ptr);
                     if(ts == 1) begin
                         $display("val = %b", t1_mem[(pe6_ptr + 24) -: IFMAP_SIZE]);
-			            packet[DATA_START:DATA_END] = 25'(t1_mem[(pe6_ptr + 24) -: IFMAP_SIZE]);
+			            packet[DATA_START:DATA_END] = t1_mem[(pe6_ptr + 24) -: IFMAP_SIZE];
                     end
                     else begin
                         $display("val = %b", t2_mem[(pe6_ptr + 24) -: IFMAP_SIZE]);
-			            packet[DATA_START:DATA_END] = 25'(t2_mem[(pe6_ptr + 24) -: IFMAP_SIZE]);
+			            packet[DATA_START:DATA_END] = t2_mem[(pe6_ptr + 24) -: IFMAP_SIZE];
                     end
                     router_out.Send(packet);
                     $display("IMEM: Sent more inputs to PPE 6");
@@ -196,16 +196,16 @@ module imem (interface load_start, interface ifmap_addr, interface ifmap_data,
 
             `OP_PPE_7_REQ_INPUT : begin
                     $display("IMEM: PPE 7 Requesting Inputs");
-                    packet[ADDR_START:ADDR_END] = 4'(`OP_PPE_7_REQ_INPUT);
-                    packet[OPCODE_START:OPCODE_END] = 4'(`OP_PPE_INPUT); 
+                    packet[ADDR_START:ADDR_END] = `OP_PPE_7_REQ_INPUT;
+                    packet[OPCODE_START:OPCODE_END] = `OP_PPE_INPUT; 
                     $display("ptr = %d", pe7_ptr);
                     if(ts == 1) begin
                         $display("val = %b", t1_mem[(pe7_ptr + 24) -: IFMAP_SIZE]);
-			            packet[DATA_START:DATA_END] = 25'(t1_mem[(pe7_ptr + 24) -: IFMAP_SIZE]);
+			            packet[DATA_START:DATA_END] = t1_mem[(pe7_ptr + 24) -: IFMAP_SIZE];
                     end
                     else begin
                         $display("val = %b", t2_mem[(pe7_ptr + 24) -: IFMAP_SIZE]);
-			            packet[DATA_START:DATA_END] = 25'(t2_mem[(pe7_ptr + 24) -: IFMAP_SIZE]);
+			            packet[DATA_START:DATA_END] = t2_mem[(pe7_ptr + 24) -: IFMAP_SIZE];
                     end
                     router_out.Send(packet);
                     $display("IMEM: Sent more inputs to PPE 7");
@@ -216,16 +216,16 @@ module imem (interface load_start, interface ifmap_addr, interface ifmap_data,
 
             `OP_PPE_8_REQ_INPUT : begin
                     $display("IMEM: PPE 8 Requesting Inputs");
-                    packet[ADDR_START:ADDR_END] = 4'(`OP_PPE_8_REQ_INPUT);
-                    packet[OPCODE_START:OPCODE_END] = 4'(`OP_PPE_INPUT); 
+                    packet[ADDR_START:ADDR_END] = `OP_PPE_8_REQ_INPUT;
+                    packet[OPCODE_START:OPCODE_END] = `OP_PPE_INPUT; 
                     $display("ptr = %d", pe8_ptr);
                     if(ts == 1) begin
                         $display("val = %b", t1_mem[(pe8_ptr + 24) -: IFMAP_SIZE]);
-			            packet[DATA_START:DATA_END] = 25'(t1_mem[(pe8_ptr + 24) -: IFMAP_SIZE]);
+			            packet[DATA_START:DATA_END] = t1_mem[(pe8_ptr + 24) -: IFMAP_SIZE];
                     end
                     else begin
                         $display("val = %b", t2_mem[(pe8_ptr + 24) -: IFMAP_SIZE]);
-                        packet[DATA_START:DATA_END] = 25'(t2_mem[(pe8_ptr + 24) -: IFMAP_SIZE]);
+                        packet[DATA_START:DATA_END] = t2_mem[(pe8_ptr + 24) -: IFMAP_SIZE];
                     end
                     router_out.Send(packet);
                     $display("IMEM: Sent more inputs to PPE 8");
@@ -236,16 +236,16 @@ module imem (interface load_start, interface ifmap_addr, interface ifmap_data,
 
             `OP_PPE_9_REQ_INPUT : begin
                     $display("IMEM: PPE 9 Requesting Inputs");
-                    packet[ADDR_START:ADDR_END] = 4'(`OP_PPE_9_REQ_INPUT);
-                    packet[OPCODE_START:OPCODE_END] = 4'(`OP_PPE_INPUT); 
+                    packet[ADDR_START:ADDR_END] = `OP_PPE_9_REQ_INPUT;
+                    packet[OPCODE_START:OPCODE_END] = `OP_PPE_INPUT; 
                     $display("ptr = %d", pe9_ptr);
                     if(ts == 1) begin
                         $display("val = %b", t1_mem[(pe9_ptr + 24) -: IFMAP_SIZE]);
-			            packet[DATA_START:DATA_END] = 25'(t1_mem[(pe9_ptr + 24) -: IFMAP_SIZE]);
+			            packet[DATA_START:DATA_END] = t1_mem[(pe9_ptr + 24) -: IFMAP_SIZE];
                     end
                     else begin
                         $display("val = %b", t2_mem[(pe9_ptr + 24) -: IFMAP_SIZE]);
-			            packet[DATA_START:DATA_END] = 25'(t2_mem[(pe9_ptr + 24) -: IFMAP_SIZE]);
+			            packet[DATA_START:DATA_END] = t2_mem[(pe9_ptr + 24) -: IFMAP_SIZE];
                     end
                     router_out.Send(packet);
                     $display("IMEM: Sent more inputs to PPE 9");

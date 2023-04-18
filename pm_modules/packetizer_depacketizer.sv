@@ -30,9 +30,9 @@ module packetizer(interface dest_address, interface opcode, interface packet_dat
 		packet_data.Receive(data);
 
 		// Store data in packet
-		packet[ADDR_START:ADDR_END] = 4'(addr);
-		packet[OPCODE_START:OPCODE_END] = 4'(op);
-		packet[DATA_START:DATA_END] = 25'(data);
+		packet[ADDR_START:ADDR_END] = addr;
+		packet[OPCODE_START:OPCODE_END] = op;
+		packet[DATA_START:DATA_END] = data;
 	
 		// Send data out
 		$display("%m: Received data=%b to send to router", packet);

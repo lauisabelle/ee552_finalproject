@@ -6,7 +6,7 @@
 import SystemVerilogCSP::*;
 
 module noc;
-    parameter WIDTH_PACKAGE = 33;
+    parameter WIDTH_PACKAGE = 50;
 
 
     // 2 phase protocol
